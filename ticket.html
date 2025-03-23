@@ -199,7 +199,7 @@
       <div align="center">--------------------------------------------------------</div>
 
       <div style="text-align: center">
-        <img alt="Barcode Generator TEC-IT" id="barcode" />
+        <img alt="Barcode Generator TEC-IT" id="referencia" />
       </div>
       <div align="center">--------------------------------------------------------</div>
       <div
@@ -242,6 +242,7 @@
       var numero = getUrlParameter("numero").split(",");
       var valor = getUrlParameter("valor").split(",");
       var simbolo = getUrlParameter("simbolo").split(",");
+      var descriptions = getUrlParameter("descriptions").split(",");
 
       var productTable = document.getElementById("productTable");
       for (var i = 0; i < descriptions.length; i++) {
