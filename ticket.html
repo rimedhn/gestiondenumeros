@@ -197,11 +197,7 @@
       <div align="center">--------------------------------------------------------</div>
       <div align="center">Gracias por su preferencia!!</div>
       <div align="center">--------------------------------------------------------</div>
-
-      <div style="text-align: center">
-        <img alt="Barcode Generator TEC-IT" id="referencia" />
-      </div>
-      <div align="center">--------------------------------------------------------</div>
+      
       <div
         style="
           padding-top: 8px;
@@ -255,132 +251,6 @@
         detailsRow.className = "listitem";
       }
 
-      document.getElementById("referencia").src =
-        "https://barcode.tec-it.com/barcode.ashx?data=" +
-        getUrlParameter("referencia");
-
-      // Function to convert number to words (Spanish)
-      function numeroALetras(numero) {
-        const unidades = [
-          "",
-          "UN",
-          "DOS",
-          "TRES",
-          "CUATRO",
-          "CINCO",
-          "SEIS",
-          "SIETE",
-          "OCHO",
-          "NUEVE",
-          "DIEZ",
-          "ONCE",
-          "DOCE",
-          "TRECE",
-          "CATORCE",
-          "QUINCE",
-          "DIECISEIS",
-          "DIECISIETE",
-          "DIECIOCHO",
-          "DIECINUEVE",
-        ];
-        const decenas = [
-          "",
-          "",
-          "VEINTE",
-          "TREINTA",
-          "CUARENTA",
-          "CINCUENTA",
-          "SESENTA",
-          "SETENTA",
-          "OCHENTA",
-          "NOVENTA",
-        ];
-        const centenas = [
-          "",
-          "CIENTO",
-          "DOSCIENTOS",
-          "TRESCIENTOS",
-          "CUATROCIENTOS",
-          "QUINIENTOS",
-          "SEISCIENTOS",
-          "SETECIENTOS",
-          "OCHOCIENTOS",
-          "NOVECIENTOS",
-        ];
-
-        function convertirGrupo(n) {
-          let resultado = "";
-
-          if (n === 100) {
-            return "CIEN";
-          }
-
-          if (n >= 100) {
-            resultado += centenas[Math.floor(n / 100)] + " ";
-            n %= 100;
-          }
-
-          if (n >= 20) {
-            resultado += decenas[Math.floor(n / 10)];
-            if (n % 10 !== 0) {
-              resultado += " Y " + unidades[n % 10];
-            }
-          } else if (n > 0) {
-            resultado += unidades[n];
-          }
-
-          return resultado.trim();
-        }
-
-        function convertirMiles(n) {
-          if (n === 0) return "";
-          if (n === 1) return "MIL";
-          return convertirGrupo(n) + " MIL";
-        }
-
-        function convertirMillones(n) {
-          if (n === 0) return "";
-          if (n === 1) return "UN MILLON";
-          return convertirGrupo(n) + " MILLONES";
-        }
-
-        if (numero === 0) return "CERO LEMPIRAS";
-
-        let resultado = "";
-        let esNegativo = numero < 0;
-        numero = Math.abs(numero);
-
-        let millones = Math.floor(numero / 1000000);
-        let miles = Math.floor((numero % 1000000) / 1000);
-        let resto = numero % 1000;
-
-        if (millones > 0) {
-          resultado += convertirMillones(millones) + " ";
-        }
-
-        if (miles > 0) {
-          resultado += convertirMiles(miles) + " ";
-        }
-
-        if (resto > 0 || resultado === "") {
-          resultado += convertirGrupo(resto);
-        }
-
-        resultado = resultado.trim();
-        if (esNegativo) {
-          resultado = "MENOS " + resultado;
-        }
-
-        // Agregar 'LEMPIRAS' o 'LEMPIRA' según corresponda
-        resultado += numero === 1 ? " LEMPIRA" : " LEMPIRAS";
-
-        return resultado;
-      }
-
-      // Set monto en letras
-      var total = parseFloat(getUrlParameter("total"));
-      document.getElementById("montoLetras").textContent =
-        "SON " + numeroALetras(total);
 
       // Trigger print when the page loads
       window.onload = function () {
