@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1;
+            margin: 25px;
+        }
+        .title {
+            text-align: left;
+        }
+        .subtitle {
+            text-align: left;
+            margin-top: 5px;
+        }
+        .section {
+            margin-top: 20px;
+        }
+        .horizontal-line {
+            border-top: 1px solid black;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .centered {
+            text-align: center;
+        }
+        .right-aligned {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">
+        <h1>RECIBO DE PAGO</h1>
+        <h2 class="subtitle">COMPROBANTE</h2>
+    </div>
+
+    <div class="section">
+        <p>FECHA: <span id="fecha"></span></p>
+        <p>CLIENTE <span id="cliente"></span></p>
+        <div class="horizontal-line"></div>
+        <p class="left-aligned">NÚMERO: <span id="numero"></span></p>
+        <p class="right-aligned">VALOR: <span id="valor"></span></p>
+        <div class="horizontal-line"></div>
+        <p>CAJERO: <span id="cajero"></span></p>
+        <div class="horizontal-line"></div>
+        <p>Observaciones: <span id="observacion"></span></p>
+        <div class="horizontal-line"></div>
+        <br><br><br>
+        <div class="horizontal-line"></div>
+        <p>REFERENCIA: <span id="referencia"></span></p>
+    </div>
+
+    <script>
+        function getQueryParam(param) {
+          var urlParams = new URLSearchParams(window.location.search);
+          return urlParams.get(param); 
+        }
+
+    function fillData() {
+        document.getElementById("fecha").textContent =
+          getQueryParam("fecha");
+        document.getElementById("cliente").textContent =
+          getQueryParam("cliente");
+        document.getElementById("numero").textContent =
+          getQueryParam("numero");
+        document.getElementById("valor").textContent =
+          getQueryParam("valor");
+        document.getElementById("cajero").textContent =
+          getQueryParam("cajero");
+        document.getElementById("observacion").textContent =
+          getQueryParam("observacion");
+        document.getElementById("referencia").textContent =
+          getQueryParam("referencia");
+         }
+         
+      window.onload = function () {
+        fillData();
+        window.print();
+      }
+    </script>
+    
+</body>
+</html>
