@@ -139,7 +139,7 @@
     <div id="thermal-pos">
       <div class="label">
         <img src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="" class="mi-imagen" /><br />
-        <b id="COMPROBANTE"></b><br />
+        <b id="">COMPROBANTE</b><br />
         <div class="label">
           <b>REFERENCIA: <span id="referencia"></span></b>
           <br />
@@ -153,10 +153,14 @@
         <tr>
           <td class="informasi" style="width: 30%;">CLIENTE:</td>
           <td class="informasi" style="width: 70%;" id="cliente"></td>
-        </tr>        
+        </tr> 
+        <tr>
+          <td class="informasi" style="width: 30%;">CAJERO:</td>
+          <td class="informasi" style="width: 70%;" id="cajero"></td>
+        </tr> 
       </table>
       <div align="center">--------------------------------------------------------</div>
-      <div align="center">Detalle</div>
+      <div align="center">DETALLE</div>
       <div align="center">--------------------------------------------------------</div>
 
       <table>
@@ -228,6 +232,7 @@
 
       // Populate the receipt with data from URL parameters
       setTextContent("referencia", getUrlParameter("referencia"));
+      setTextContent("cajero", getUrlParameter("cajero"));
       setTextContent("fecha", getUrlParameter("fecha"));
       setTextContent("cliente", getUrlParameter("cliente"));
       setTextContent("total", getUrlParameter("total"));
