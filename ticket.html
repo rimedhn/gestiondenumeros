@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Thermal POS Receipt</title>
+    <title>RECIBO</title>
     <style>
       #thermal-pos {
         box-shadow: 0 0 0mm #eee;
@@ -241,16 +241,7 @@
       // Populate product table
       var numero = getUrlParameter("numero").split(",");
       var valor = getUrlParameter("valor").split(",");
-      var simbolo = getUrlParameter("simbolo").split(",");
-      var descriptions = getUrlParameter("descriptions").split(",");
-
-      var productTable = document.getElementById("productTable");
-      for (var i = 0; i < descriptions.length; i++) {
-        // Create a new row for the description
-        var descriptionRow = productTable.insertRow();
-        descriptionRow.innerHTML = `
-        <td colspan="3" class="descriptions">${descriptions[i]}</td>
-    `;
+      var simbolo = getUrlParameter("simbolo").split(",");      
 
         // Create a new row for the other details
         var detailsRow = productTable.insertRow();
