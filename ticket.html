@@ -138,82 +138,22 @@
   <body id="all">
     <div id="thermal-pos">
       <div class="label">
-        <img src="" alt="" class="mi-imagen" /><br />
-        <b id="empresa"></b><br />
-        <b id="razon"></b>
+        <img src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="" class="mi-imagen" /><br />
+        <b id="COMPROBANTE"></b><br />
         <div class="label">
-          <b>RTN: <span id="rtn"></span></b>
-          <br />
-        </div>
-        <div class="label">
-          <b>Direccion: <span id="direccion"></span></b>
-          <br />
-        </div>
-        <div class="label">
-          <b>Telefono: <span id="telefono"></span></b>
-          <br />
-        </div>
-        <div class="label">
-          <b id="email"></b>
+          <b>REFERENCIA: <span id="referencia"></span></b>
           <br />
         </div>
       </div>
-
-      <div align="center">--------------------------------------------------------</div>
-      <div align="center" id="tipodoc"></div>
-      <div align="center">--------------------------------------------------------</div>
-
       <table>
         <tr>
-          <td class="informasi" style="width: 30%;">Folio:</td>
-          <td class="informasi" style="width: 70%;" id="factura"></td>
+          <td class="informasi" style="width: 30%;">FECHA:</td>
+          <td class="informasi" style="width: 70%;" id="fecha"></td>
         </tr>
         <tr>
-          <td class="informasi" style="width: 30%;">Fecha:</td>
-          <td class="informasi" style="width: 70%;" id="date"></td>
-        </tr>        
-      </table>
-      <div align="center">--------------------------------------------------------</div>
-      <div align="center">Datos del cliente</div>
-      <div align="center">--------------------------------------------------------</div>
-      <table>
-        <tr>
-          <td class="informasi" style="width: 30%;">Cliente:</td>
+          <td class="informasi" style="width: 30%;">CLIENTE:</td>
           <td class="informasi" style="width: 70%;" id="cliente"></td>
-        </tr>
-        <tr>
-          <td class="informasi" style="width: 30%;">RTN:</td>
-          <td class="informasi" style="width: 70%;" id="rtncliente"></td>
-        </tr>
-        <tr>
-          <td class="informasi" style="width: 30%;">Direccion:</td>
-          <td class="informasi" style="width: 70%;" id="direccioncliente"></td>
-        </tr>
-        <tr>
-          <td class="informasi" style="width: 30%;">Telefono:</td>
-          <td class="informasi" style="width: 70%;" id="telefonocliente"></td>
-        </tr>
-      </table>
-      <div align="center">--------------------------------------------------------</div>
-      <div align="center">Condiciones de pago</div>
-      <div align="center">--------------------------------------------------------</div>
-      <table>
-        <tr>
-          <td class="informasi">Forma de pago:</td>
-          <td class="informasi" id="formapago"></td>
-        </tr>
-        <tr>
-          <td class="informasi">Plazo en días:</td>
-          <td class="informasi" id="plazo"></td>
-        </tr>
-        <tr>
-          <td class="informasi">Cantida de pagos:</td>
-          <td class="informasi" id="pagos"></td>
-        </tr>
-        <tr>
-          <td class="informasi">Cuota por pago:</td>
-          <td class="informasi">L<span id="cuota"></span></td>
-        </tr>
+        </tr>        
       </table>
       <div align="center">--------------------------------------------------------</div>
       <div align="center">Detalle</div>
@@ -222,19 +162,13 @@
       <table>
         <tr class="listitem">
           <td>
-            <h2>Cant</h2>
+            <h2>NÚMERO</h2>
           </td>
           <td>
-            <h2>Precio</h2>
+            <h2>VALOR</h2>
           </td>
           <td>
-            <h2>Desc.</h2>
-          </td>
-          <td>
-            <h2>Isv</h2>
-          </td>
-          <td>
-            <h2>Monto</h2>
+            <h2>SÍMBOLO</h2>
           </td>
         </tr>
       </table>
@@ -247,34 +181,17 @@
       <div align="center">--------------------------------------------------------</div>
       <table>
         <tr>
-          <td class="detail">Subtotal</td>
-          <td class="detail1">L<span id="subtotal"></span></td>
-        </tr>
-        <tr>
-          <td class="detail">Descuento</td>
-          <td class="detail1">L<span id="descuento"></span></td>
-        </tr>        
-        <tr>
-          <td class="detail">Total venta:</td>
+          <td class="detail">TOTAL</td>
           <td class="detail1">L<span id="total"></span></td>
         </tr>
-        <tr>
-          <td class="detail">Recibido:</td>
-          <td class="detail1">L<span id="recibido"></span></td>
-        </tr>
-        <tr>
-          <td class="detail">Cambio:</td>
-          <td class="detail1">L<span id="cambio"></span></td>
-        </tr>
       </table>
-
+      
       <div align="center">--------------------------------------------------------</div>
 
       <div id="montoLetras" style="text-align: center"></div>
 
       <div align="center">--------------------------------------------------------</div>
       <div align="center">Gracias por su preferencia!!</div>
-      <div align="center">Original: Cliente, Copia: Emisor</div>
       <div align="center">--------------------------------------------------------</div>
 
       <div style="text-align: center">
@@ -289,9 +206,7 @@
           font-family: Source Sans Pro, Arial, sans-serif;
         "
       >
-        <span>www.rmposhn.com</span><br />
-        <span>indime.hn@gmail.com</span><br />
-        <span>(+504) 9359-3126</span>
+
       </div>
     </div>
 
@@ -312,36 +227,16 @@
       }
 
       // Populate the receipt with data from URL parameters
-      setTextContent("empresa", getUrlParameter("empresa"));
-      setTextContent("razon", getUrlParameter("razon"));
-      setTextContent("rtn", getUrlParameter("rtn"));
-      setTextContent("direccion", getUrlParameter("direccion"));
-      setTextContent("telefono", getUrlParameter("telefono"));
-      setTextContent("email", getUrlParameter("email"));
-      setTextContent("tipodoc", getUrlParameter("tipodoc"));
-      setTextContent("factura", getUrlParameter("factura"));
-      setTextContent("date", getUrlParameter("date"));      
+      setTextContent("referencia", getUrlParameter("referencia"));
+      setTextContent("fecha", getUrlParameter("fecha"));
       setTextContent("cliente", getUrlParameter("cliente"));
-      setTextContent("rtncliente", getUrlParameter("rtncliente"));
-      setTextContent("direccioncliente", getUrlParameter("direccioncliente"));
-      setTextContent("telefonocliente", getUrlParameter("telefonocliente"));
-      setTextContent("formapago", getUrlParameter("formapago"));
-      setTextContent("plazo", getUrlParameter("plazo"));
-      setTextContent("pagos", getUrlParameter("pagos"));
-      setTextContent("cuota", getUrlParameter("cuota"));      
-      setTextContent("subtotal", getUrlParameter("subtotal"));
-      setTextContent("descuento", getUrlParameter("descuento"));      
       setTextContent("total", getUrlParameter("total"));
-      setTextContent("recibido", getUrlParameter("recibido"));
-      setTextContent("cambio", getUrlParameter("cambio"));
+      setTextContent("observacion", getUrlParameter("observacion"));
 
       // Populate product table
-      var descriptions = getUrlParameter("descriptions").split(",");
-      var quantitys = getUrlParameter("quantitys").split(",");
-      var prices = getUrlParameter("price").split(",");
-      var descproductos = getUrlParameter("descproducto").split(",");
-      var isvproductos = getUrlParameter("isvproducto").split(",");
-      var amounts = getUrlParameter("amounts").split(",");
+      var descriptions = getUrlParameter("numero").split(",");
+      var quantitys = getUrlParameter("valor").split(",");
+      var prices = getUrlParameter("simbolo").split(",");
 
       var productTable = document.getElementById("productTable");
       for (var i = 0; i < descriptions.length; i++) {
@@ -354,11 +249,9 @@
         // Create a new row for the other details
         var detailsRow = productTable.insertRow();
         detailsRow.innerHTML = `
-        <td class="qty">${quantitys[i]}</td>
-        <td class="Price">${prices[i]}</td>
-        <td class="Desc">${descproductos[i]}</td>
-        <td class="Isv">${isvproductos[i]}</td>
-        <td class="Amount">${amounts[i]}</td>
+        <td class="qty">${numero[i]}</td>
+        <td class="Price">${valor[i]}</td>
+        <td class="Desc">${simbolo[i]}</td>
     `;
 
         // Add a class to the details row for styling
