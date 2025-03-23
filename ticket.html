@@ -239,16 +239,16 @@
       setTextContent("observacion", getUrlParameter("observacion"));
 
       // Populate product table
-      var descriptions = getUrlParameter("numero").split(",");
-      var quantitys = getUrlParameter("valor").split(",");
-      var prices = getUrlParameter("simbolo").split(",");
+      var numero = getUrlParameter("numero").split(",");
+      var valor = getUrlParameter("valor").split(",");
+      var simbolo = getUrlParameter("simbolo").split(",");
 
       var productTable = document.getElementById("productTable");
       for (var i = 0; i < descriptions.length; i++) {
         // Create a new row for the description
         var descriptionRow = productTable.insertRow();
         descriptionRow.innerHTML = `
-        <td colspan="5" class="descriptions">${descriptions[i]}</td>
+        <td colspan="3" class="descriptions">${descriptions[i]}</td>
     `;
 
         // Create a new row for the other details
