@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RECIBO</title>
+    <title>Thermal POS Receipt</title>
     <style>
       #thermal-pos {
         box-shadow: 0 0 0mm #eee;
@@ -138,13 +138,15 @@
   <body id="all">
     <div id="thermal-pos">
       <div class="label">
-        <img src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="" class="mi-imagen" /><br />
-        <b id="">COMPROBANTE</b><br />
-        <div class="label">
-          <b>REFERENCIA: <span id="referencia"></span></b>
-          <br />
-        </div>
+        <img src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Mi imagen" class="mi-imagen" /><br />
+        <b>COMPROBANTE</b><br />
+        <b>REFERENCIA: <span id="referencia"></span></b>        
       </div>
+
+      <div align="center">--------------------------------------------------------</div>
+      <div align="center" id="tipodoc"></div>
+      <div align="center">--------------------------------------------------------</div>
+
       <table>
         <tr>
           <td class="informasi" style="width: 30%;">FECHA:</td>
@@ -153,12 +155,13 @@
         <tr>
           <td class="informasi" style="width: 30%;">CLIENTE:</td>
           <td class="informasi" style="width: 70%;" id="cliente"></td>
-        </tr> 
+        </tr>
         <tr>
           <td class="informasi" style="width: 30%;">CAJERO:</td>
           <td class="informasi" style="width: 70%;" id="cajero"></td>
-        </tr> 
+        </tr>
       </table>
+
       <div align="center">--------------------------------------------------------</div>
       <div align="center">DETALLE</div>
       <div align="center">--------------------------------------------------------</div>
@@ -166,13 +169,19 @@
       <table>
         <tr class="listitem">
           <td>
-            <h2>NÚMERO</h2>
+            <h2>Cant</h2>
           </td>
           <td>
-            <h2>VALOR</h2>
+            <h2>Precio</h2>
           </td>
           <td>
-            <h2>SÍMBOLO</h2>
+            <h2>Desc.</h2>
+          </td>
+          <td>
+            <h2>Isv</h2>
+          </td>
+          <td>
+            <h2>Monto</h2>
           </td>
         </tr>
       </table>
@@ -185,18 +194,64 @@
       <div align="center">--------------------------------------------------------</div>
       <table>
         <tr>
-          <td class="detail1">TOTAL</td>
+          <td class="detail">Subtotal</td>
+          <td class="detail1">L<span id="subtotal"></span></td>
+        </tr>
+        <tr>
+          <td class="detail">Descuento</td>
+          <td class="detail1">L<span id="descuento"></span></td>
+        </tr>
+        <tr>
+          <td class="detail">Subtotal exento:</td>
+          <td class="detail1">L<span id="subtotalexe"></span></td>
+        </tr>
+        <tr>
+          <td class="detail">Subtotal exonerado:</td>
+          <td class="detail1">L<span id="subtotalexo"></span></td>
+        </tr>
+        <tr>
+          <td class="detail">Subtotal 15%:</td>
+          <td class="detail1">L<span id="subtotalisv15"></span></td>
+        </tr>
+        <tr>
+          <td class="detail">Subtotal 18%:</td>
+          <td class="detail1">L<span id="subtotalisv18"></span></td>
+        </tr>
+        <tr>
+          <td class="detail">Impuesto 15%:</td>
+          <td class="detail1">L<span id="isv15"></span></td>
+        </tr>
+        <tr>
+          <td class="detail">Impuesto 18%:</td>
+          <td class="detail1">L<span id="isv18"></span></td>
+        </tr>
+        <tr>
+          <td class="detail">Total venta:</td>
           <td class="detail1">L<span id="total"></span></td>
         </tr>
+        <tr>
+          <td class="detail">Recibido:</td>
+          <td class="detail1">L<span id="recibido"></span></td>
+        </tr>
+        <tr>
+          <td class="detail">Cambio:</td>
+          <td class="detail1">L<span id="cambio"></span></td>
+        </tr>
       </table>
-      
+
       <div align="center">--------------------------------------------------------</div>
 
-      
+      <div id="montoLetras" style="text-align: center"></div>
+
       <div align="center">--------------------------------------------------------</div>
       <div align="center">Gracias por su preferencia!!</div>
+      <div align="center">Original: Cliente, Copia: Emisor</div>
       <div align="center">--------------------------------------------------------</div>
-      
+
+      <div style="text-align: center">
+        <img alt="Barcode Generator TEC-IT" id="barcode" />
+      </div>
+      <div align="center">--------------------------------------------------------</div>
       <div
         style="
           padding-top: 8px;
@@ -205,7 +260,9 @@
           font-family: Source Sans Pro, Arial, sans-serif;
         "
       >
-
+        <span>www.rmposhn.com</span><br />
+        <span>indime.hn@gmail.com</span><br />
+        <span>(+504) 9359-3126</span>
       </div>
     </div>
 
@@ -226,30 +283,197 @@
       }
 
       // Populate the receipt with data from URL parameters
-      setTextContent("referencia", getUrlParameter("referencia"));
-      setTextContent("cajero", getUrlParameter("cajero"));
-      setTextContent("fecha", getUrlParameter("fecha"));
+      setTextContent("empresa", getUrlParameter("empresa"));
+      setTextContent("razon", getUrlParameter("razon"));
+      setTextContent("rtn", getUrlParameter("rtn"));
+      setTextContent("direccion", getUrlParameter("direccion"));
+      setTextContent("telefono", getUrlParameter("telefono"));
+      setTextContent("email", getUrlParameter("email"));
+      setTextContent("tipodoc", getUrlParameter("tipodoc"));
+      setTextContent("factura", getUrlParameter("factura"));
+      setTextContent("date", getUrlParameter("date"));
+      setTextContent("cai", getUrlParameter("cai"));
+      setTextContent("rango", getUrlParameter("rango"));
+      setTextContent("limite", getUrlParameter("limite"));
       setTextContent("cliente", getUrlParameter("cliente"));
+      setTextContent("rtncliente", getUrlParameter("rtncliente"));
+      setTextContent("direccioncliente", getUrlParameter("direccioncliente"));
+      setTextContent("telefonocliente", getUrlParameter("telefonocliente"));
+      setTextContent("formapago", getUrlParameter("formapago"));
+      setTextContent("plazo", getUrlParameter("plazo"));
+      setTextContent("pagos", getUrlParameter("pagos"));
+      setTextContent("cuota", getUrlParameter("cuota"));
+      setTextContent("ocexe", getUrlParameter("ocexe"));
+      setTextContent("ocexo", getUrlParameter("ocexo"));
+      setTextContent("nosag", getUrlParameter("nosag"));
+      setTextContent("subtotal", getUrlParameter("subtotal"));
+      setTextContent("descuento", getUrlParameter("descuento"));
+      setTextContent("subtotalexe", getUrlParameter("subtotalexe"));
+      setTextContent("subtotalexo", getUrlParameter("subtotalexo"));
+      setTextContent("subtotalisv15", getUrlParameter("subtotalisv15"));
+      setTextContent("subtotalisv18", getUrlParameter("subtotalisv18"));
+      setTextContent("isv15", getUrlParameter("isv15"));
+      setTextContent("isv18", getUrlParameter("isv18"));
       setTextContent("total", getUrlParameter("total"));
-      setTextContent("observacion", getUrlParameter("observacion"));
+      setTextContent("recibido", getUrlParameter("recibido"));
+      setTextContent("cambio", getUrlParameter("cambio"));
 
       // Populate product table
-      var numero = getUrlParameter("numero").split(",");
-      var valor = getUrlParameter("valor").split(",");
-      var simbolo = getUrlParameter("simbolo").split(",");      
+      var descriptions = getUrlParameter("descriptions").split(",");
+      var quantitys = getUrlParameter("quantitys").split(",");
+      var prices = getUrlParameter("price").split(",");
+      var descproductos = getUrlParameter("descproducto").split(",");
+      var isvproductos = getUrlParameter("isvproducto").split(",");
+      var amounts = getUrlParameter("amounts").split(",");
+
+      var productTable = document.getElementById("productTable");
+      for (var i = 0; i < descriptions.length; i++) {
+        // Create a new row for the description
+        var descriptionRow = productTable.insertRow();
+        descriptionRow.innerHTML = `
+        <td colspan="5" class="descriptions">${descriptions[i]}</td>
+    `;
 
         // Create a new row for the other details
         var detailsRow = productTable.insertRow();
         detailsRow.innerHTML = `
-        <td class="qty">${numero[i]}</td>
-        <td class="Price">${valor[i]}</td>
-        <td class="Desc">${simbolo[i]}</td>
+        <td class="qty">${quantitys[i]}</td>
+        <td class="Price">${prices[i]}</td>
+        <td class="Desc">${descproductos[i]}</td>
+        <td class="Isv">${isvproductos[i]}</td>
+        <td class="Amount">${amounts[i]}</td>
     `;
 
         // Add a class to the details row for styling
         detailsRow.className = "listitem";
       }
 
+      document.getElementById("barcode").src =
+        "https://barcode.tec-it.com/barcode.ashx?data=" +
+        getUrlParameter("Folio_1");
+
+      // Function to convert number to words (Spanish)
+      function numeroALetras(numero) {
+        const unidades = [
+          "",
+          "UN",
+          "DOS",
+          "TRES",
+          "CUATRO",
+          "CINCO",
+          "SEIS",
+          "SIETE",
+          "OCHO",
+          "NUEVE",
+          "DIEZ",
+          "ONCE",
+          "DOCE",
+          "TRECE",
+          "CATORCE",
+          "QUINCE",
+          "DIECISEIS",
+          "DIECISIETE",
+          "DIECIOCHO",
+          "DIECINUEVE",
+        ];
+        const decenas = [
+          "",
+          "",
+          "VEINTE",
+          "TREINTA",
+          "CUARENTA",
+          "CINCUENTA",
+          "SESENTA",
+          "SETENTA",
+          "OCHENTA",
+          "NOVENTA",
+        ];
+        const centenas = [
+          "",
+          "CIENTO",
+          "DOSCIENTOS",
+          "TRESCIENTOS",
+          "CUATROCIENTOS",
+          "QUINIENTOS",
+          "SEISCIENTOS",
+          "SETECIENTOS",
+          "OCHOCIENTOS",
+          "NOVECIENTOS",
+        ];
+
+        function convertirGrupo(n) {
+          let resultado = "";
+
+          if (n === 100) {
+            return "CIEN";
+          }
+
+          if (n >= 100) {
+            resultado += centenas[Math.floor(n / 100)] + " ";
+            n %= 100;
+          }
+
+          if (n >= 20) {
+            resultado += decenas[Math.floor(n / 10)];
+            if (n % 10 !== 0) {
+              resultado += " Y " + unidades[n % 10];
+            }
+          } else if (n > 0) {
+            resultado += unidades[n];
+          }
+
+          return resultado.trim();
+        }
+
+        function convertirMiles(n) {
+          if (n === 0) return "";
+          if (n === 1) return "MIL";
+          return convertirGrupo(n) + " MIL";
+        }
+
+        function convertirMillones(n) {
+          if (n === 0) return "";
+          if (n === 1) return "UN MILLON";
+          return convertirGrupo(n) + " MILLONES";
+        }
+
+        if (numero === 0) return "CERO LEMPIRAS";
+
+        let resultado = "";
+        let esNegativo = numero < 0;
+        numero = Math.abs(numero);
+
+        let millones = Math.floor(numero / 1000000);
+        let miles = Math.floor((numero % 1000000) / 1000);
+        let resto = numero % 1000;
+
+        if (millones > 0) {
+          resultado += convertirMillones(millones) + " ";
+        }
+
+        if (miles > 0) {
+          resultado += convertirMiles(miles) + " ";
+        }
+
+        if (resto > 0 || resultado === "") {
+          resultado += convertirGrupo(resto);
+        }
+
+        resultado = resultado.trim();
+        if (esNegativo) {
+          resultado = "MENOS " + resultado;
+        }
+
+        // Agregar 'LEMPIRAS' o 'LEMPIRA' según corresponda
+        resultado += numero === 1 ? " LEMPIRA" : " LEMPIRAS";
+
+        return resultado;
+      }
+
+      // Set monto en letras
+      var total = parseFloat(getUrlParameter("total"));
+      document.getElementById("montoLetras").textContent =
+        "SON " + numeroALetras(total);
 
       // Trigger print when the page loads
       window.onload = function () {
