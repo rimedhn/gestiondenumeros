@@ -235,11 +235,18 @@
       setTextContent("cambio", getUrlParameter("cambio"));
 
       // Populate product table
+      var descriptions = getUrlParameter("descriptions").split(",");
       var quantitys = getUrlParameter("quantitys").split(",");
       var prices = getUrlParameter("price").split(",");
       var amounts = getUrlParameter("amounts").split(",");
 
-    
+      var productTable = document.getElementById("productTable");
+      for (var i = 0; i < descriptions.length; i++) {
+        // Create a new row for the description
+        var descriptionRow = productTable.insertRow();
+        descriptionRow.innerHTML = `
+        <td colspan="3" class="descriptions">${descriptions[i]}</td>
+    `;
 
         // Create a new row for the other details
         var detailsRow = productTable.insertRow();
