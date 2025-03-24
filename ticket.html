@@ -190,13 +190,20 @@
         <tr>
           <td class="detail">TOTAL</td>
           <td class="detail1">L<span id="total"></span></td>
-        </tr>        
+        </tr>
+        <tr>
+          <td class="detail">RECIBIDO</td>
+          <td class="detail1">L<span id="recibido"></span></td>
+        </tr> 
+        <tr>
+          <td class="detail">CAMBIO</td>
+          <td class="detail1">L<span id="cambio"></span></td>
+        </tr> 
       </table>
 
       <div align="center">--------------------------------------------------------</div>
-
+      <div id="folio" style="text-align: center"></div>
       <div id="montoLetras" style="text-align: center"></div>
-
       <div align="center">--------------------------------------------------------</div>
       <div align="center">Gracias por su preferencia!!</div>
       <div align="center">--------------------------------------------------------</div>
@@ -223,34 +230,8 @@
       setTextContent("fecha", getUrlParameter("fecha"));
       setTextContent("cliente", getUrlParameter("cliente"));
       setTextContent("cajero", getUrlParameter("cajero"));
-      setTextContent("telefono", getUrlParameter("telefono"));
-      setTextContent("email", getUrlParameter("email"));
-      setTextContent("tipodoc", getUrlParameter("tipodoc"));
-      setTextContent("factura", getUrlParameter("factura"));
-      setTextContent("date", getUrlParameter("date"));
-      setTextContent("cai", getUrlParameter("cai"));
-      setTextContent("rango", getUrlParameter("rango"));
-      setTextContent("limite", getUrlParameter("limite"));
-      setTextContent("cliente", getUrlParameter("cliente"));
-      setTextContent("rtncliente", getUrlParameter("rtncliente"));
-      setTextContent("direccioncliente", getUrlParameter("direccioncliente"));
-      setTextContent("telefonocliente", getUrlParameter("telefonocliente"));
-      setTextContent("formapago", getUrlParameter("formapago"));
-      setTextContent("plazo", getUrlParameter("plazo"));
-      setTextContent("pagos", getUrlParameter("pagos"));
-      setTextContent("cuota", getUrlParameter("cuota"));
-      setTextContent("ocexe", getUrlParameter("ocexe"));
-      setTextContent("ocexo", getUrlParameter("ocexo"));
-      setTextContent("nosag", getUrlParameter("nosag"));
-      setTextContent("subtotal", getUrlParameter("subtotal"));
-      setTextContent("descuento", getUrlParameter("descuento"));
-      setTextContent("subtotalexe", getUrlParameter("subtotalexe"));
-      setTextContent("subtotalexo", getUrlParameter("subtotalexo"));
-      setTextContent("subtotalisv15", getUrlParameter("subtotalisv15"));
-      setTextContent("subtotalisv18", getUrlParameter("subtotalisv18"));
-      setTextContent("isv15", getUrlParameter("isv15"));
-      setTextContent("isv18", getUrlParameter("isv18"));
       setTextContent("total", getUrlParameter("total"));
+      setTextContent("folio", getUrlParameter("folio"));
       setTextContent("recibido", getUrlParameter("recibido"));
       setTextContent("cambio", getUrlParameter("cambio"));
 
