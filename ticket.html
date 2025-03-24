@@ -239,8 +239,6 @@
       var descriptions = getUrlParameter("descriptions").split(",");
       var quantitys = getUrlParameter("quantitys").split(",");
       var prices = getUrlParameter("price").split(",");
-      var descproductos = getUrlParameter("descproducto").split(",");
-      var isvproductos = getUrlParameter("isvproducto").split(",");
       var amounts = getUrlParameter("amounts").split(",");
 
       var productTable = document.getElementById("productTable");
@@ -256,8 +254,6 @@
         detailsRow.innerHTML = `
         <td class="qty">${quantitys[i]}</td>
         <td class="Price">${prices[i]}</td>
-        <td class="Desc">${descproductos[i]}</td>
-        <td class="Isv">${isvproductos[i]}</td>
         <td class="Amount">${amounts[i]}</td>
     `;
 
