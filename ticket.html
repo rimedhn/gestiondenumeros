@@ -160,6 +160,10 @@
           <td class="informasi" style="width: 30%;">CAJERO:</td>
           <td class="informasi" style="width: 70%;" id="cajero"></td>
         </tr>
+        <tr>
+          <td class="informasi" style="width: 30%;">JUEGA:</td>
+          <td class="informasi" style="width: 70%;" id="juega"></td>
+        </tr>
       </table>
 
       <div align="center">--------------------------------------------------------</div>
@@ -233,7 +237,7 @@
       setTextContent("folio", getUrlParameter("folio"));
       setTextContent("recibido", getUrlParameter("recibido"));
       setTextContent("cambio", getUrlParameter("cambio"));
-
+      setTextContent("juega", getUrlParameter("juega"));
       // Populate product table
       var descriptions = getUrlParameter("descriptions").split(",");
       var quantitys = getUrlParameter("quantitys").split(",");
