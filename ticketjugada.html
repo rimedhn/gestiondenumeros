@@ -177,9 +177,6 @@
           </td>
           <td>
             <h2>MONTO</h2>
-          </td>
-          <td>
-            <h2>CLIENTE</h2>
           </td>          
         </tr>
       </table>
@@ -221,7 +218,6 @@
       // Populate product table
       var descriptions = getUrlParameter("descriptions").split(",");
       var quantitys = getUrlParameter("quantitys").split(",");
-      var prices = getUrlParameter("price").split(",");
       var amounts = getUrlParameter("amounts").split(",");
 
       var productTable = document.getElementById("productTable");
@@ -236,7 +232,6 @@
         var detailsRow = productTable.insertRow();
         detailsRow.innerHTML = `
         <td class="qty">${quantitys[i]}</td>
-        <td class="Price">${prices[i]}</td>
         <td class="Amount">${amounts[i]}</td>
     `;
 
