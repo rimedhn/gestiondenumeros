@@ -140,7 +140,7 @@
     <div id="thermal-pos">
       <div class="label">
         <img src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Mi imagen" class="mi-imagen" /><br />
-        <b>COMPROBANTE</b><br />               
+        <b>RESUMEN</b><br />               
       </div>
 
       <div align="center">--------------------------------------------------------</div>
@@ -153,12 +153,16 @@
           <td class="informasi" style="width: 70%;" id="fecha"></td>
         </tr>
         <tr>
-          <td class="informasi" style="width: 30%;">CLIENTE:</td>
-          <td class="informasi" style="width: 70%;" id="cliente"></td>
-        </tr>
-        <tr>
           <td class="informasi" style="width: 30%;">CAJERO:</td>
           <td class="informasi" style="width: 70%;" id="cajero"></td>
+        </tr>
+        <tr>
+          <td class="informasi" style="width: 30%;">JUGADA:</td>
+          <td class="informasi" style="width: 70%;" id="jugada"></td>
+        </tr>
+          <tr>
+          <td class="informasi" style="width: 30%;">TOTAL:</td>
+          <td class="informasi" style="width: 70%;" id="total"></td>
         </tr>
       </table>
 
@@ -175,7 +179,7 @@
             <h2>MONTO</h2>
           </td>
           <td>
-            <h2>JUEGA</h2>
+            <h2>CLIENTE</h2>
           </td>          
         </tr>
       </table>
@@ -186,21 +190,7 @@
       </table>
 
       <div align="center">--------------------------------------------------------</div>
-      <table>
-        <tr>
-          <td class="detail">TOTAL</td>
-          <td class="detail1">L<span id="total"></span></td>
-        </tr>
-        <tr>
-          <td class="detail">RECIBIDO</td>
-          <td class="detail1">L<span id="recibido"></span></td>
-        </tr> 
-        <tr>
-          <td class="detail">CAMBIO</td>
-          <td class="detail1">L<span id="cambio"></span></td>
-        </tr> 
-      </table>
-
+      <div   align="center"><b>OBSERVACIONES: <span id="observaciones"></span></b></div>
       <div align="center">--------------------------------------------------------</div>
       <div id="folio" style="text-align: center"></div>
       <div align="center">--------------------------------------------------------</div>
@@ -227,12 +217,12 @@
       // Populate the receipt with data from URL parameters
       setTextContent("referencia", getUrlParameter("referencia"));
       setTextContent("fecha", getUrlParameter("fecha"));
-      setTextContent("cliente", getUrlParameter("cliente"));
       setTextContent("cajero", getUrlParameter("cajero"));
       setTextContent("total", getUrlParameter("total"));
       setTextContent("folio", getUrlParameter("folio"));
-      setTextContent("recibido", getUrlParameter("recibido"));
-      setTextContent("cambio", getUrlParameter("cambio"));
+      setTextContent("jugada", getUrlParameter("jugada"));
+      setTextContent("observaciones", getUrlParameter("observaciones"));
+      
       // Populate product table
       var descriptions = getUrlParameter("descriptions").split(",");
       var quantitys = getUrlParameter("quantitys").split(",");
