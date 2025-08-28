@@ -24,6 +24,11 @@
       padding: 0;
       position: relative;
     }
+    .main-content {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      width: 100%;
+    }
     .header-row {
       display: flex;
       justify-content: space-between;
@@ -95,10 +100,11 @@
     }
     .info-table {
       width: 100%;
-      margin-bottom: 18px;
+      margin-bottom: 15px;
       border-collapse: collapse;
       font-size: 1.08em;
       page-break-inside: avoid;
+      break-inside: avoid;
     }
     .info-table td {
       padding: 7px 12px;
@@ -119,25 +125,21 @@
       color: #222;
       padding-bottom: 3px;
     }
-    .detalle-section {
-      page-break-inside: avoid;
-      break-inside: avoid;
-      width: 100%;
-      margin-bottom: 0;
-    }
     .detalle-title {
       text-align: center;
       font-weight: bold;
       font-size: 1.15em;
-      margin: 8px 0 8px 0;
+      margin: 2px 0 8px 0;
       color: #444;
       letter-spacing: 1px;
-      /* page-break-before: always;  <-- QUITADO! */
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
     .detalle-grid-wrapper {
       page-break-inside: avoid;
       break-inside: avoid;
       width: 100%;
+      margin-bottom: 0;
     }
     .detalle-grid {
       display: grid;
@@ -202,20 +204,7 @@
         background: #fff !important;
         page-break-after: always;
       }
-      .detalle-section {
-        page-break-inside: avoid;
-        break-inside: avoid;
-      }
-      .detalle-grid-wrapper {
-        page-break-inside: avoid;
-        break-inside: avoid;
-      }
-      .detalle-card {
-        page-break-inside: avoid;
-        break-inside: avoid;
-      }
-      /* Asegura que el bloque de detalle no se separe de los datos generales */
-      .info-table, .detalle-section, .detalle-grid-wrapper, .detalle-title {
+      .main-content, .info-table, .detalle-title, .detalle-grid-wrapper, .detalle-grid, .detalle-card {
         page-break-inside: avoid;
         break-inside: avoid;
       }
@@ -225,38 +214,38 @@
 </head>
 <body>
   <div class="jugada-carta">
-    <div class="header-row">
-      <div class="header-left">
-        <img class="logo-img" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Logo Gestión de Números" />
-        <div class="header-business">
-          <div class="titulo-negocio">GESTIÓN DE NÚMEROS</div>
-          <div class="resumen-label">Resumen de Jugada</div>
+    <div class="main-content">
+      <div class="header-row">
+        <div class="header-left">
+          <img class="logo-img" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Logo Gestión de Números" />
+          <div class="header-business">
+            <div class="titulo-negocio">GESTIÓN DE NÚMEROS</div>
+            <div class="resumen-label">Resumen de Jugada</div>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="barcode-container">
+            <svg id="barcode"></svg>
+          </div>
+          <div class="codigo-jugada">ID Jugada: <span id="idjugada"></span></div>
         </div>
       </div>
-      <div class="header-right">
-        <div class="barcode-container">
-          <svg id="barcode"></svg>
-        </div>
-        <div class="codigo-jugada">ID Jugada: <span id="idjugada"></span></div>
-      </div>
-    </div>
-    <table class="info-table">
-      <tr>
-        <td class="info-label">Fecha</td>
-        <td class="info-label">Total Números</td>
-        <td class="info-label">Usuario</td>
-      </tr>
-      <tr>
-        <td class="info-value"><span id="fecha"></span><br><span id="hora" style="font-size:0.96em;color:#666;"></span></td>
-        <td class="info-value"><span id="totalNumeros"></span><br><span id="totalVenta" style="font-size:0.96em;color:#666;"></span></td>
-        <td class="info-value"><span id="usuario"></span><br><span id="observaciones" style="font-size:0.96em;color:#666;"></span></td>
-      </tr>
-      <tr>
-        <td class="info-label">Referencia:</td>
-        <td class="info-value" colspan="2"><span id="referencia"></span></td>
-      </tr>
-    </table>
-    <div class="detalle-section">
+      <table class="info-table">
+        <tr>
+          <td class="info-label">Fecha</td>
+          <td class="info-label">Total Números</td>
+          <td class="info-label">Usuario</td>
+        </tr>
+        <tr>
+          <td class="info-value"><span id="fecha"></span><br><span id="hora" style="font-size:0.96em;color:#666;"></span></td>
+          <td class="info-value"><span id="totalNumeros"></span><br><span id="totalVenta" style="font-size:0.96em;color:#666;"></span></td>
+          <td class="info-value"><span id="usuario"></span><br><span id="observaciones" style="font-size:0.96em;color:#666;"></span></td>
+        </tr>
+        <tr>
+          <td class="info-label">Referencia:</td>
+          <td class="info-value" colspan="2"><span id="referencia"></span></td>
+        </tr>
+      </table>
       <div class="detalle-title">Detalle</div>
       <div class="detalle-grid-wrapper">
         <div id="detalleGrid" class="detalle-grid"></div>
