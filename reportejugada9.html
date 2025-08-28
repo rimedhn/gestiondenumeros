@@ -262,6 +262,7 @@
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 </head>
 <body>
   <div id="loadingMsg">CARGANDO DATOS...</div>
@@ -443,7 +444,6 @@
           pagesContainer.appendChild(pageDiv);
         });
 
-        // Mostrar contenido y activar botón de imprimir/exportar
         document.getElementById("jugadaCarta").style.display = "block";
         document.getElementById("loadingMsg").style.display = "none";
         document.getElementById("printBtn").style.display = "block";
@@ -458,9 +458,17 @@
 
     window.onload = cargarJugada;
 
-    // Exportar a PDF solo cuando los datos estén cargados
+    // Exportar a PDF usando html2pdf.js (móvil y PC)
     document.getElementById("printBtn").onclick = function() {
-      window.print();
+      var element = document.getElementById("jugadaCarta");
+      var opt = {
+        margin: [0.4, 0.3, 0.7, 0.3], // top, left, bottom, right
+        filename: 'jugada.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
     };
   </script>
 </body>
