@@ -157,17 +157,16 @@
       break-inside: avoid;
       width: 100%;
       margin-bottom: 0;
+      overflow-x: auto;
     }
     .detalle-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* ADAPTATIVO */
+      grid-template-columns: repeat(8, 1fr);
       gap: 14px;
       margin-bottom: 14px;
       width: 100%;
-      place-items: start;
-      align-items: start;
-      justify-items: start;
-      /* Elimina espacios vacíos por justificación */
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
     .detalle-card {
       background: #fafafa;
@@ -234,6 +233,47 @@
     }
     #printBtn:active {
       background: #144;
+    }
+    @media (max-width: 900px) {
+      .jugada-carta {
+        width: 100vw;
+        min-width: 0;
+        padding: 0;
+      }
+      .main-content, .detalle-section, .detalle-page, .detalle-grid-wrapper {
+        width: 100vw;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+      }
+      .detalle-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .detalle-card {
+        font-size: 0.98em;
+        min-height: 38px;
+        padding: 7px 7px 4px 7px;
+      }
+    }
+    @media (max-width: 600px) {
+      .detalle-grid {
+        grid-template-columns: repeat(1, 1fr);
+        gap: 5px;
+      }
+      .header-left, .header-right {
+        width: 100%;
+        min-width: 0;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 0;
+      }
+      .logo-img {
+        width: 65px;
+        height: 65px;
+        margin-right: 6px;
+      }
     }
     @media print {
       #printBtn, #loadingMsg {
@@ -497,7 +537,6 @@
 
     document.getElementById("printBtn").onclick = function() {
       if (isMobileDevice()) {
-        // El logo ya está en base64 por setLogoBase64
         var element = document.getElementById("jugadaCarta");
         var opt = {
           margin: [0.4, 0.3, 0.7, 0.3],
