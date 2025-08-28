@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resumen de Venta - Gestión de Números</title>
+    <!-- Tamaño carta -->
+    <style>
+      @media print {
+        body, html {
+          width: 210mm;
+          height: 297mm;
+          margin: 0;
+          padding: 0;
+        }
+        .carta {
+          width: 190mm;
+          min-height: 270mm;
+          margin: 0 auto;
+          padding: 15mm 10mm;
+          background: #fff;
+          box-sizing: border-box;
+        }
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background: #f0f0f0;
+      }
+      .carta {
+        width: 100%;
+        max-width: 800px;
+        margin: 20px auto;
+        background: #fff;
+        padding: 32px 24px;
+        box-shadow: 0 0 10px #ccc;
+        border-radius: 8px;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 16px;
+      }
+      .logo {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        margin-bottom: 12px;
+      }
+      .titulo-negocio {
+        font-size: 1.8em;
+        font-weight: bold;
+        margin-bottom: 4px;
+        color: #333;
+      }
+      .barcode-container {
+        text-align: center;
+        margin-bottom: 14px;
+      }
+      .info-table {
+        width: 100%;
+        margin-bottom: 18px;
+        border-collapse: collapse;
+      }
+      .info-table td {
+        padding: 5px 10px;
+        font-size: 1em;
+      }
+      .info-label {
+        font-weight: bold;
+        color: #444;
+        width: 28%;
+        vertical-align: top;
+      }
+      .detalle-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.2em;
+        margin: 14px 0 8px 0;
+        color: #444;
+        letter-spacing: 2px;
+      }
+      .detalle-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+      .detalle-card {
+        background: #fafafa;
+        border: 1px solid #eaeaea;
+        border-radius: 6px;
+        padding: 11px 12px 8px 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .numero {
+        font-size: 1.25em;
+        font-weight: bold;
+        color: #266;
+        margin-bottom: 6px;
+      }
+      .valor {
+        font-size: 1.1em;
+        color: #444;
+        margin-bottom: 2px;
+      }
+      .observaciones {
+        background: #f1f1f1;
+        padding: 10px 12px;
+        border-radius: 5px;
+        font-size: 1em;
+        color: #444;
+        margin-bottom: 10px;
+      }
+      .footer {
+        text-align: right;
+        font-size: 0.95em;
+        color: #888;
+        margin-top: 18px;
+      }
+      .no-data {
+        text-align: center;
+        color: #b00;
+        font-size: 1.05em;
+        margin-top: 12px;
+      }
+    </style>
+    <!-- JsBarcode CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  </head>
+  <body>
+    <div class="carta">
+      <div class="header">
+        <img class="logo" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Logo Gestión de Números" />
+        <div class="titulo-negocio">GESTIÓN DE NÚMEROS</div>
+        <div style="font-size:1.15em;color:#555;">Resumen de Venta</div>
+      </div>
+      <div class="barcode-container">
+        <svg id="barcode"></svg>
+        <div style="font-size:0.95em;color:#777;">ID Jugada: <span id="idjugada"></span></div>
+      </div>
+      <table class="info-table">
+        <tr>
+          <td class="info-label">Fecha:</td>
+          <td id="fecha"></td>
+          <td class="info-label">Hora:</td>
+          <td id="hora"></td>
+        </tr>
+        <tr>
+          <td class="info-label">Cajero:</td>
+          <td id="usuario"></td>
+          <td class="info-label">Ticket:</td>
+          <td id="ticket"></td>
+        </tr>
+        <tr>
+          <td class="info-label">Observaciones:</td>
+          <td id="observaciones" colspan="3"></td>
+        </tr>
+      </table>
+      <div class="detalle-title">Detalle de Jugada</div>
+      <div id="detalleGrid" class="detalle-grid"></div>
+      <div class="footer">
+        <span id="fechaimpresion"></span>
+      </div>
+      <div id="nodata" class="no-data" style="display:none;">
+        No se encontró información activa para esta jugada.
+      </div>
+    </div>
+    <script>
+      // ========== CONFIGURAR TU URL DE JSON OPESHEET ==========
+      // Ejemplo: const opesheeturl = 'https://api.sheety.co/tuUsuario/tuProyecto';
+      const opesheeturl = "https://api.sheety.co/tuUsuario/tuProyecto"; // <-- MODIFICA ESTO
+
+      // OBTENER ID DEL QUERYSTRING
+      function getUrlParameter(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+        var results = regex.exec(location.search);
+        return results === null
+          ? ""
+          : decodeURIComponent(results[1].replace(/\+/g, " "));
+      }
+      const jugadaID = getUrlParameter("id");
+
+      document.getElementById("idjugada").textContent = jugadaID || "";
+
+      // FECHA DE IMPRESION
+      const now = new Date();
+      document.getElementById("fechaimpresion").textContent =
+        "Impreso: " + now.toLocaleDateString() + " " + now.toLocaleTimeString();
+
+      // FUNCION PARA GENERAR EL CODIGO DE BARRAS
+      function renderBarcode(id) {
+        JsBarcode("#barcode", id || "", {
+          format: "CODE128",
+          width: 2,
+          height: 90,
+          displayValue: false,
+          margin: 0,
+        });
+      }
+
+      // CONSULTA DATOS DE JUGADA Y DETALLE
+      async function fetchData() {
+        if (!jugadaID) {
+          document.getElementById("nodata").style.display = "block";
+          return;
+        }
+        try {
+          // Consultar jugadas activas
+          // Ajusta el endpoint y la propiedad según tu API de opesheet
+          const jugadaRes = await fetch(`${opesheeturl}/jugada?ID=${jugadaID}`);
+          const jugadaJson = await jugadaRes.json();
+          const jugadas = jugadaJson.jugada || jugadaJson.jugadas || [];
+          const jugada = jugadas.find(j =>
+            (j.ID == jugadaID || j.id == jugadaID) &&
+            (j.ESTADO == "Activo" || j.estado == "Activo")
+          );
+          if (!jugada) {
+            document.getElementById("nodata").style.display = "block";
+            return;
+          }
+
+          // Mostrar datos jugada
+          document.getElementById("fecha").textContent = jugada.FECHA || jugada.fecha || "";
+          document.getElementById("hora").textContent = jugada.HORA || jugada.hora || "";
+          document.getElementById("usuario").textContent = jugada.USUARIO || jugada.usuario || "";
+          document.getElementById("ticket").textContent = jugada.TICKET || jugada.ticket || "";
+          document.getElementById("observaciones").textContent = jugada.OBSERVACIONES || jugada.observaciones || "";
+
+          // Generar barcode
+          renderBarcode(jugadaID);
+
+          // Concatenar FECHA+HORA para buscar los detalles
+          const jugadaKey = (jugada.FECHA || jugada.fecha || "") +
+            (jugada.HORA || jugada.hora || "");
+
+          // Consultar detalles activos
+          const detalleRes = await fetch(`${opesheeturl}/detalle`);
+          const detalleJson = await detalleRes.json();
+          const detalles = detalleJson.detalle || detalleJson.detalles || [];
+          // Relacionar por FECHA+JUEGA y Estado=Activo
+          const detallesFiltrados = detalles.filter(d => {
+            // Concatenacion exacta: d.FECHA+d.JUEGA == jugadaKey
+            const dFecha = d.FECHA || d.fecha || "";
+            const dJuega = d.JUEGA || d.juega || "";
+            const estado = d.ESTADO || d.estado || "";
+            return estado === "Activo" &&
+              (dFecha + dJuega === jugadaKey);
+          });
+
+          // Mostrar detalles en pares de Numero y Valor
+          const grid = document.getElementById("detalleGrid");
+          grid.innerHTML = ""; // Limpiar
+          if (!detallesFiltrados.length) {
+            document.getElementById("nodata").style.display = "block";
+            return;
+          }
+          detallesFiltrados.forEach(det => {
+            const numero = det.NUMERO || det.numero || "";
+            const valor = det.VALOR || det.valor || "";
+            const card = document.createElement("div");
+            card.className = "detalle-card";
+            card.innerHTML = `
+              <div class="numero"># ${numero}</div>
+              <div class="valor">$ ${valor}</div>
+            `;
+            grid.appendChild(card);
+          });
+
+        } catch (e) {
+          document.getElementById("nodata").style.display = "block";
+        }
+      }
+
+      fetchData();
+
+      // IMPRIMIR AUTOMÁTICAMENTE AL CARGAR
+      window.onload = function () {
+        setTimeout(function(){
+          window.print();
+        }, 1200); // Espera 1.2s para cargar datos/barcode
+      };
+    </script>
+  </body>
+</html>
