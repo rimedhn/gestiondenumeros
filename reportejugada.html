@@ -217,7 +217,7 @@
       ])
       .then(([jugadas, detalles]) => {
         // Buscar la jugada activa por ID
-        var jugada = jugadas.find(j => (j.ID == jugadaID || j.id == jugadaID) && (j.ESTADO == "Activo" || j.estado == "Activo"));
+        var jugada = jugadas.find(j => (j.ID == jugadaID || j.id == jugadaID) && (j.ESTADO == "ACTIVO" || j.estado == "ACTIVO"));
         if (!jugada) {
           document.getElementById("nodata").style.display = "block";
           return;
