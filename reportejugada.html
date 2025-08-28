@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resumen de Jugada - Gestión de Números</title>
+  <style>
+    @page {
+      size: letter;
+      margin: 0.7in 0.5in 1.1in 0.5in;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    .jugada-carta {
+      width: 8in;
+      margin: auto;
+      min-height: 10in;
+      background: #fff;
+      padding: 0;
+      position: relative;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .logo-img {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      margin-bottom: 6px;
+    }
+    .titulo-negocio {
+      font-size: 1.55em;
+      font-weight: bold;
+      margin-bottom: 2px;
+      color: #333;
+    }
+    .barcode-container {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    #barcode {
+      width: 160px !important;
+      height: 70px !important;
+      object-fit: contain;
+      display: block;
+      margin: auto;
+    }
+    .info-table {
+      width: 100%;
+      margin-bottom: 12px;
+      border-collapse: collapse;
+      font-size: 1em;
+    }
+    .info-table td {
+      padding: 5px 10px;
+      font-size: 1em;
+      border: none;
+      background: #fff;
+    }
+    .info-label {
+      font-weight: bold;
+      color: #444;
+      width: 22%;
+      vertical-align: top;
+    }
+    .totales-table {
+      width: 100%;
+      margin-bottom: 12px;
+      border-collapse: collapse;
+      font-size: 1em;
+    }
+    .totales-table td {
+      padding: 5px 10px;
+      font-size: 1em;
+      border: none;
+      color: #222;
+      background: #fafafa;
+      font-weight: bold;
+    }
+    .detalle-title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.15em;
+      margin: 10px 0 8px 0;
+      color: #444;
+      letter-spacing: 1px;
+    }
+    .detalle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .detalle-card {
+      background: #fafafa;
+      border: 1px solid #eaeaea;
+      border-radius: 6px;
+      padding: 10px 10px 7px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .numero {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #266;
+      margin-bottom: 4px;
+    }
+    .valor {
+      font-size: 1.08em;
+      color: #444;
+      margin-bottom: 2px;
+    }
+    .observaciones {
+      background: #f1f1f1;
+      padding: 9px 12px;
+      border-radius: 4px;
+      font-size: 1em;
+      color: #444;
+      margin-bottom: 8px;
+      margin-top: 10px;
+      width: 90%;
+    }
+    .footer {
+      text-align: right;
+      font-size: 0.95em;
+      color: #888;
+      margin-top: 12px;
+    }
+    .no-data {
+      text-align: center;
+      color: #b00;
+      font-size: 1.05em;
+      margin-top: 10px;
+    }
+    @media print {
+      .jugada-carta {
+        background: #fff !important;
+        page-break-after: always;
+      }
+    }
+  </style>
+  <!-- JsBarcode CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+  <div class="jugada-carta">
+    <div class="header">
+      <img class="logo-img" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Logo Gestión de Números" />
+      <div class="titulo-negocio">GESTIÓN DE NÚMEROS</div>
+      <div style="font-size:1.08em;color:#555;">Resumen de Jugada</div>
+    </div>
+    <div class="barcode-container">
+      <svg id="barcode"></svg>
+      <div style="font-size:0.95em;color:#777;">ID Jugada: <span id="idjugada"></span></div>
+    </div>
+    <table class="info-table">
+      <tr>
+        <td class="info-label">Fecha:</td>
+        <td id="fecha"></td>
+        <td class="info-label">Hora:</td>
+        <td id="hora"></td>
+      </tr>
+      <tr>
+        <td class="info-label">Cajero:</td>
+        <td id="usuario"></td>
+        <td class="info-label">Ticket:</td>
+        <td id="ticket"></td>
+      </tr>
+      <tr>
+        <td class="info-label">Total:</td>
+        <td id="total"></td>
+        <td class="info-label">Referencia:</td>
+        <td id="referencia"></td>
+      </tr>
+    </table>
+    <table class="totales-table">
+      <tr>
+        <td id="totalNumerosLabel">Total Números:</td>
+        <td id="totalNumeros"></td>
+        <td id="totalVentaLabel">Total Venta:</td>
+        <td id="totalVenta"></td>
+      </tr>
+    </table>
+    <div class="detalle-title">Detalle</div>
+    <div id="detalleGrid" class="detalle-grid"></div>
+    <div id="observaciones" class="observaciones"></div>
+    <div class="footer">
+      <span id="fechaimpresion"></span>
+    </div>
+    <div id="nodata" class="no-data" style="display:none;">
+      No se encontró información activa para esta jugada.
+    </div>
+  </div>
+  <script>
+    // === CONFIGURACION: URLs de las hojas Opensheet ===
+    var opensheetUrlJugada = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/JUGADA";
+    var opensheetUrlDetalle = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/DETALLE";
+
+    // === OBTENER ID DE LA JUGADA DEL QUERYSTRING ===
+    function getQueryParam(param) {
+      var urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    var jugadaID = getQueryParam("id");
+
+    document.getElementById("idjugada").textContent = jugadaID || "";
+
+    // FECHA DE IMPRESION
+    var now = new Date();
+    document.getElementById("fechaimpresion").textContent =
+      "Impreso: " + now.toLocaleDateString() + " " + now.toLocaleTimeString();
+
+    // === FUNCION PARA GENERAR EL CODIGO DE BARRAS ===
+    function renderBarcode(id) {
+      JsBarcode("#barcode", id || "", {
+        format: "CODE128",
+        width: 2,
+        height: 90,
+        displayValue: false,
+        margin: 0,
+      });
+    }
+
+    // === FORMATEO DE MONEDA LEMPIRAS ===
+    function formatLempiras(num) {
+      if (isNaN(num)) return "L 0.00";
+      return "L " + num.toLocaleString('es-HN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    // === CONSULTA Y MUESTRA DATOS ===
+    function cargarJugada() {
+      if (!jugadaID) {
+        document.getElementById("nodata").style.display = "block";
+        return;
+      }
+      Promise.all([
+        fetch(opensheetUrlJugada).then(resp => resp.json()),
+        fetch(opensheetUrlDetalle).then(resp => resp.json())
+      ])
+      .then(([jugadas, detalles]) => {
+        // Buscar la jugada activa por ID
+        var jugada = jugadas.find(j => (j.ID == jugadaID || j.id == jugadaID) && (j.ESTADO == "ACTIVO" || j.estado == "ACTIVO"));
+        if (!jugada) {
+          document.getElementById("nodata").style.display = "block";
+          return;
+        }
+
+        // Mostrar datos jugada
+        document.getElementById("fecha").textContent = jugada.FECHA || jugada.fecha || "";
+        document.getElementById("hora").textContent = jugada.HORA || jugada.hora || "";
+        document.getElementById("usuario").textContent = jugada.USUARIO || jugada.usuario || "";
+        document.getElementById("ticket").textContent = jugada.TICKET || jugada.ticket || "";
+        document.getElementById("total").textContent = formatLempiras(parseFloat(jugada.TOTAL || jugada.total || 0));
+        document.getElementById("referencia").textContent = jugada.ID || jugada.id || "";
+        document.getElementById("observaciones").textContent = jugada.OBSERVACIONES || jugada.observaciones || "";
+
+        // Generar barcode
+        renderBarcode(jugadaID);
+
+        // CLAVE PARA RELACIONAR DETALLE: FECHA+HORA de JUGADA === FECHA+JUEGA de DETALLE
+        var jugadaKey = (jugada.FECHA || jugada.fecha || "") + (jugada.HORA || jugada.hora || "");
+
+        // Filtrar detalles activos y relacionados
+        var detallesFiltrados = detalles.filter(d => {
+          var dFecha = d.FECHA || d.fecha || "";
+          var dJuega = d.JUEGA || d.juega || "";
+          var estado = d.ESTADO || d.estado || "";
+          return estado === "ACTIVO" && (dFecha + dJuega === jugadaKey);
+        });
+
+        // Calcular Totales
+        var totalNumeros = detallesFiltrados.length;
+        var totalVenta = detallesFiltrados.reduce(function(sum, det) {
+          var val = (det.VALOR || det.valor || "0").toString().replace(",", ".");
+          var num = parseFloat(val);
+          return sum + (isNaN(num) ? 0 : num);
+        }, 0);
+
+        // Mostrar los totales
+        document.getElementById("totalNumeros").textContent = totalNumeros;
+        document.getElementById("totalVenta").textContent = formatLempiras(totalVenta);
+
+        // Renderizar detalles en pares de Numero y Valor tipo grid
+        var grid = document.getElementById("detalleGrid");
+        grid.innerHTML = "";
+        if (!detallesFiltrados.length) {
+          document.getElementById("nodata").style.display = "block";
+          return;
+        }
+        detallesFiltrados.forEach(det => {
+          var numero = det.NUMERO || det.numero || "";
+          var valor = det.VALOR || det.valor || "";
+          var valorFormateado = formatLempiras(parseFloat(valor.toString().replace(",", ".")));
+          var card = document.createElement("div");
+          card.className = "detalle-card";
+          card.innerHTML = `
+            <div class="numero"># ${numero}</div>
+            <div class="valor">${valorFormateado}</div>
+          `;
+          grid.appendChild(card);
+        });
+
+        // Imprimir automáticamente después de cargar
+        setTimeout(function(){
+          window.print();
+        }, 800);
+
+      })
+      .catch(function(e){
+        document.getElementById("nodata").style.display = "block";
+      });
+    }
+
+    window.onload = cargarJugada;
+  </script>
+</body>
+</html>
