@@ -58,6 +58,7 @@
       height: 110px;
       object-fit: contain;
       margin-right: 15px;
+      background: #fff;
     }
     .header-business {
       display: flex;
@@ -271,7 +272,8 @@
     <div class="main-content">
       <div class="header-row">
         <div class="header-left">
-          <img class="logo-img" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Logo Gestión de Números" />
+          <!-- La imagen se convertirá a base64 para html2pdf -->
+          <img class="logo-img" id="logoImg" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Logo Gestión de Números" />
           <div class="header-business">
             <div class="titulo-negocio">GESTIÓN DE NÚMEROS</div>
             <div class="resumen-label">Resumen de Jugada</div>
@@ -363,6 +365,39 @@
         }
       }
       return result;
+    }
+
+    // Convierte la imagen externa a base64 para html2pdf
+    function toDataURL(url, callback) {
+      var xhr = new XMLHttpRequest();
+      xhr.onload = function() {
+        var reader = new FileReader();
+        reader.onloadend = function() {
+          callback(reader.result);
+        }
+        reader.readAsDataURL(xhr.response);
+      };
+      xhr.onerror = function() {
+        callback(null);
+      };
+      xhr.open('GET', url);
+      xhr.responseType = 'blob';
+      xhr.send();
+    }
+
+    function prepareLogoForPDF(callback) {
+      var img = document.getElementById('logoImg');
+      var url = img.getAttribute('src');
+      if (url.startsWith('data:')) {
+        callback();
+        return;
+      }
+      toDataURL(url, function(dataUrl) {
+        if (dataUrl) {
+          img.setAttribute('src', dataUrl);
+        }
+        callback();
+      });
     }
 
     function cargarJugada() {
@@ -458,18 +493,40 @@
 
     window.onload = cargarJugada;
 
-    // Exportar a PDF usando html2pdf.js (móvil y PC)
+    // Detectar si es móvil simple
+    function isMobileDevice() {
+      return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent);
+    }
+
+    // Exportar a PDF usando html2pdf.js (solo en móvil)
     document.getElementById("printBtn").onclick = function() {
-      var element = document.getElementById("jugadaCarta");
-      var opt = {
-        margin: [0.4, 0.3, 0.7, 0.3], // top, left, bottom, right
-        filename: 'jugada.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(element).save();
+      // Convertimos logo a base64 antes de exportar
+      prepareLogoForPDF(function() {
+        var element = document.getElementById("jugadaCarta");
+        var opt = {
+          margin: [0.4, 0.3, 0.7, 0.3], // top, left, bottom, right
+          filename: 'jugada.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+      });
     };
+
+    // Mostrar botón correcto según el dispositivo
+    function updateExportButton() {
+      var btn = document.getElementById("printBtn");
+      if (isMobileDevice()) {
+        btn.textContent = "Descargar PDF";
+      } else {
+        btn.textContent = "Imprimir";
+        btn.onclick = function() {
+          window.print();
+        };
+      }
+    }
+    updateExportButton();
   </script>
 </body>
 </html>
