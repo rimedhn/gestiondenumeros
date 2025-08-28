@@ -243,7 +243,7 @@
           var dFecha = d.FECHA || d.fecha || "";
           var dJuega = d.JUEGA || d.juega || "";
           var estado = d.ESTADO || d.estado || "";
-          return estado === "Activo" && (dFecha + dJuega === jugadaKey);
+          return estado === "ACTIVO" && (dFecha + dJuega === jugadaKey);
         });
 
         // Renderizar detalles en pares de Numero y Valor tipo grid
