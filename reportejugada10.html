@@ -272,7 +272,6 @@
     <div class="main-content">
       <div class="header-row">
         <div class="header-left">
-          <!-- La imagen se convertirá a base64 para html2pdf -->
           <img class="logo-img" id="logoImg" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Logo Gestión de Números" />
           <div class="header-business">
             <div class="titulo-negocio">GESTIÓN DE NÚMEROS</div>
@@ -350,7 +349,6 @@
       return "L " + Math.round(num).toLocaleString('es-HN', {maximumFractionDigits: 0});
     }
 
-    // Devuelve array de arrays: [ [48], [80], [80], ... ]
     function paginarDetalles(detalles, firstPage, nextPages) {
       var result = [];
       var start = 0;
@@ -367,7 +365,6 @@
       return result;
     }
 
-    // Convierte la imagen externa a base64 para html2pdf
     function toDataURL(url, callback) {
       var xhr = new XMLHttpRequest();
       xhr.onload = function() {
@@ -436,7 +433,6 @@
           return estado === "ACTIVO" && (dFecha + dJuega === jugadaKey);
         });
 
-        // Ordenar por Numero (numérico si es posible, alfabético si no)
         detallesFiltrados.sort(function(a, b){
           var numA = a.NUMERO || a.numero || "";
           var numB = b.NUMERO || b.numero || "";
@@ -493,12 +489,10 @@
 
     window.onload = cargarJugada;
 
-    // Detectar si es móvil simple
     function isMobileDevice() {
       return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent);
     }
 
-    // Exportar a PDF usando html2pdf.js (solo en móvil)
     document.getElementById("printBtn").onclick = function() {
       if (isMobileDevice()) {
         prepareLogoForPDF(function() {
@@ -512,7 +506,6 @@
           };
           html2pdf().set(opt).from(element).outputPdf('blob').then(function(pdfBlob){
             if (navigator.canShare && navigator.canShare({ files: [new File([pdfBlob], 'jugada.pdf', { type: 'application/pdf' })] })) {
-              alert("Se generó el PDF. Selecciona cómo deseas compartir el archivo (WhatsApp, correo, Drive, etc).");
               navigator.share({
                 files: [new File([pdfBlob], 'jugada.pdf', { type: 'application/pdf' })],
                 title: 'Resumen de Jugada',
@@ -537,7 +530,6 @@
       }
     };
 
-    // Mostrar botón correcto según el dispositivo
     function updateExportButton() {
       var btn = document.getElementById("printBtn");
       if (isMobileDevice()) {
