@@ -1,705 +1,547 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Jugada</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Courier New', monospace;
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .main-content {
-            margin-bottom: 30px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #333;
-        }
-
-        .logo-container {
-            margin-bottom: 15px;
-        }
-
-        .logo-img {
-            width: 110px;
-            height: auto;
-        }
-
-        .company-name {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .report-title {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .info-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 4px;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding: 5px 0;
-        }
-
-        .info-label {
-            font-weight: bold;
-            color: #555;
-        }
-
-        .info-value {
-            color: #333;
-        }
-
-        .table-container {
-            margin-bottom: 20px;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #333;
-            color: white;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 12px;
-        }
-
-        td {
-            font-size: 14px;
-        }
-
-        .numero {
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 16px;
-        }
-
-        .monto {
-            text-align: right;
-            font-weight: bold;
-        }
-
-        .total-section {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f0f0f0;
-            border-radius: 4px;
-        }
-
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            font-size: 16px;
-        }
-
-        .total-label {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .total-value {
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 18px;
-        }
-
-        .footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #333;
-            text-align: center;
-            color: #666;
-            font-size: 12px;
-        }
-
-        .print-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-bottom: 20px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .print-button:hover {
-            background-color: #45a049;
-        }
-
-        @media print {
-            body {
-                background-color: white;
-                padding: 0;
-            }
-
-            .container {
-                box-shadow: none;
-                padding: 0;
-                max-width: 100%;
-            }
-
-            .print-button {
-                display: none;
-            }
-
-            .page-break {
-                page-break-after: always;
-            }
-
-            .header {
-                margin-bottom: 20px;
-            }
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
-            color: #666;
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* Estilos para múltiples páginas */
-        .pages-container {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
-
-        .page {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        @media print {
-            .pages-container {
-                gap: 0;
-            }
-
-            .page {
-                box-shadow: none;
-                padding: 0;
-                page-break-after: always;
-            }
-
-            .page:last-child {
-                page-break-after: auto;
-            }
-        }
-
-        /* Estilos para el total general */
-        .grand-total-section {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #e8f5e9;
-            border-radius: 4px;
-            border: 2px solid #4CAF50;
-        }
-
-        .grand-total-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            font-size: 20px;
-        }
-
-        .grand-total-label {
-            font-weight: bold;
-            color: #2e7d32;
-        }
-
-        .grand-total-value {
-            font-weight: bold;
-            color: #1b5e20;
-            font-size: 24px;
-        }
-
-        /* Ajustes para impresión de fecha */
-        .footer-info {
-            margin-top: 10px;
-        }
-
-        #fechaimpresion {
-            font-style: italic;
-        }
-
-        /* Estilos para observaciones */
-        .observaciones-section {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #fff3cd;
-            border-radius: 4px;
-            border-left: 4px solid #ffc107;
-        }
-
-        .observaciones-label {
-            font-weight: bold;
-            color: #856404;
-            margin-bottom: 5px;
-        }
-
-        .observaciones-text {
-            color: #856404;
-            font-style: italic;
-        }
-
-        /* Estilos para el estado */
-        .estado-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .estado-activo {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .estado-anulado {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .footer #fechaimpresion {
-            margin-top: 5px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resumen de Jugada - Gestión de Números</title>
+  <link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" type="image/x-icon">
+  <style>
+    @page {
+      size: letter;
+      margin: 0.7in 0.5in 1.1in 0.5in;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    .jugada-carta {
+      width: 8in;
+      margin: auto;
+      min-height: 10in;
+      background: #fff;
+      padding: 0;
+      position: relative;
+    }
+    #loadingMsg {
+      display: none;
+      text-align: center;
+      font-size: 1.25em;
+      color: #226;
+      margin: 24px 0;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .main-content {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      width: 100%;
+    }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      width: 53%;
+      min-width: 340px;
+      margin-top: 7px;
+    }
+    .logo-img {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      margin-right: 15px;
+      background: #fff;
+    }
+    .header-business {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .titulo-negocio {
+      font-size: 1.48em;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 3px;
+      margin-top: 7px;
+      word-break: break-word;
+    }
+    .resumen-label {
+      font-size: 1.08em;
+      color: #555;
+      margin-bottom: 0px;
+      margin-left: 1px;
+      font-weight: bold;
+      word-break: break-word;
+    }
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      width: 47%;
+      min-width: 200px;
+      margin-top: 7px;
+    }
+    .barcode-container {
+      text-align: right;
+      margin-bottom: 8px;
+    }
+    #barcode {
+      width: 160px !important;
+      height: 70px !important;
+      object-fit: contain;
+      display: block;
+      margin: 0 0 2px auto;
+    }
+    .codigo-jugada {
+      font-size: 0.95em;
+      color: #777;
+      margin-top: 0px;
+      text-align: right;
+      word-break: break-word;
+    }
+    .info-table {
+      width: 100%;
+      margin-bottom: 15px;
+      border-collapse: collapse;
+      font-size: 1.08em;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .info-table td {
+      padding: 7px 12px;
+      font-size: 1em;
+      border: none;
+      background: #fff;
+      vertical-align: top;
+    }
+    .info-label {
+      font-weight: bold;
+      color: #444;
+      width: 33%;
+      vertical-align: top;
+      padding-bottom: 3px;
+    }
+    .info-value {
+      font-size: 1em;
+      color: #222;
+      padding-bottom: 3px;
+    }
+    .detalle-section,
+    .detalle-page {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      width: 100%;
+      margin-bottom: 0;
+    }
+    .detalle-title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.15em;
+      margin: 2px 0 8px 0;
+      color: #444;
+      letter-spacing: 1px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .detalle-grid-wrapper {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      width: 100%;
+      margin-bottom: 0;
+    }
+    .detalle-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 14px;
+      margin-bottom: 14px;
+      width: 100%;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .detalle-card {
+      background: #fafafa;
+      border: 1px solid #eaeaea;
+      border-radius: 6px;
+      padding: 10px 10px 7px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      min-width: 0;
+      min-height: 60px;
+    }
+    .numero {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #266;
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+    .valor {
+      font-size: 1.08em;
+      color: #444;
+      margin-bottom: 2px;
+      word-break: break-word;
+    }
+    .observaciones {
+      background: #f1f1f1;
+      padding: 9px 12px;
+      border-radius: 4px;
+      font-size: 1em;
+      color: #444;
+      margin-bottom: 8px;
+      margin-top: 10px;
+      width: 96%;
+      word-break: break-word;
+    }
+    .footer {
+      text-align: right;
+      font-size: 0.95em;
+      color: #888;
+      margin-top: 12px;
+    }
+    .no-data {
+      text-align: center;
+      color: #b00;
+      font-size: 1.05em;
+      margin-top: 10px;
+    }
+    #printBtn {
+      display: none;
+      margin: 18px auto 0 auto;
+      font-size: 1.1em;
+      padding: 8px 24px;
+      background: #226;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 6px #aaa2;
+    }
+    #printBtn:active {
+      background: #144;
+    }
+    @media print {
+      #printBtn, #loadingMsg {
+        display: none !important;
+      }
+      .jugada-carta {
+        background: #fff !important;
+        page-break-after: always;
+      }
+      .main-content, 
+      .info-table, 
+      .detalle-section, 
+      .detalle-page,
+      .detalle-title, 
+      .detalle-grid-wrapper, 
+      .detalle-grid, 
+      .detalle-card {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .detalle-page {
+        page-break-before: always;
+        break-before: page;
+      }
+      .detalle-page.first {
+        page-break-before: auto !important;
+        break-before: auto !important;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-    <button class="print-button" onclick="window.print()">Imprimir Reporte</button>
-    
-    <div id="pagesContainer" class="pages-container">
-        <div class="loading">Cargando datos...</div>
+  <div id="loadingMsg">CARGANDO DATOS...</div>
+  <button id="printBtn">Exportar a PDF</button>
+  <div class="jugada-carta" id="jugadaCarta">
+    <div class="main-content">
+      <div class="header-row">
+        <div class="header-left">
+          <img class="logo-img" id="logoImg" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Logo Gestión de Números" />
+          <div class="header-business">
+            <div class="titulo-negocio">GESTIÓN DE NÚMEROS</div>
+            <div class="resumen-label">Resumen de Jugada</div>
+            <div class="resumen-label" id="referencia"></div>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="barcode-container">
+            <svg id="barcode"></svg>
+          </div>
+          <div class="codigo-jugada">ID Jugada: <span id="idjugada"></span></div>
+        </div>
+      </div>
+      <table class="info-table">
+        <tr>
+          <td class="info-label">Fecha</td>
+          <td class="info-label">Total Números</td>
+          <td class="info-label">Usuario</td>
+        </tr>
+        <tr>
+          <td class="info-value"><span id="fecha"></span></td>
+          <td class="info-value"><span id="totalNumeros"></span></td>
+          <td class="info-value"><span id="usuario"></span></td>
+        </tr>
+      </table>
+      <table class="info-table">
+        <tr>
+          <td class="info-label">Hora</td>
+          <td class="info-label">Total Venta</td>
+          <td class="info-label">Observaciones</td>
+        </tr>
+        <tr>
+          <td class="info-value"><span id="hora" ></span></td>
+          <td class="info-value"><span id="totalVenta" ></span></td>
+          <td class="info-value"><span id="observaciones" ></span></td>
+        </tr>
+      </table>
+      <div id="detallePagesContainer"></div>
     </div>
+    <div class="footer">
+      <span id="fechaimpresion"></span>
+    </div>
+    <div id="nodata" class="no-data" style="display:none;">
+      No se encontró información activa para esta jugada.
+    </div>
+  </div>
+  <script>
+    var opensheetUrlJugada = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/JUGADA";
+    var opensheetUrlDetalle = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/DETALLE";
 
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { getFirestore, collection, query, where, getDocs, orderBy } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    function getQueryParam(param) {
+      var urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    var jugadaID = getQueryParam("id");
+    document.getElementById("idjugada").textContent = jugadaID || "";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2l6fCIB82HgutJPF8BE_BWDSeDHGQqdU",
-            authDomain: "gestion-de-numero-84a77.firebaseapp.com",
-            projectId: "gestion-de-numero-84a77",
-            storageBucket: "gestion-de-numero-84a77.firebasestorage.app",
-            messagingSenderId: "183riptedNumbers987159302",
-            appId: "1:987159302183:web:9c8ca9ea7d70a35aab502f"
+    var now = new Date();
+    document.querySelector(".footer #fechaimpresion").textContent =
+      "Impreso: " + now.toLocaleDateString() + " " + now.toLocaleTimeString();
+
+    function renderBarcode(id) {
+      JsBarcode("#barcode", id || "", {
+        format: "CODE128",
+        width: 2,
+        height: 90,
+        displayValue: false,
+        margin: 0,
+      });
+    }
+
+    function formatLempirasSinDecimales(num) {
+      if (isNaN(num)) return "L 0";
+      return "L " + Math.round(num).toLocaleString('es-HN', {maximumFractionDigits: 0});
+    }
+
+    function paginarDetalles(detalles, firstPage, nextPages) {
+      var result = [];
+      var start = 0;
+      if (detalles.length <= firstPage) {
+        result.push(detalles);
+      } else {
+        result.push(detalles.slice(0, firstPage));
+        start = firstPage;
+        while (start < detalles.length) {
+          result.push(detalles.slice(start, start + nextPages));
+          start += nextPages;
+        }
+      }
+      return result;
+    }
+
+    function toDataURL(url, callback) {
+      var xhr = new XMLHttpRequest();
+      xhr.onload = function() {
+        var reader = new FileReader();
+        reader.onloadend = function() {
+          callback(reader.result);
+        }
+        reader.readAsDataURL(xhr.response);
+      };
+      xhr.onerror = function() {
+        callback(null);
+      };
+      xhr.open('GET', url);
+      xhr.responseType = 'blob';
+      xhr.send();
+    }
+
+    function prepareLogoForPDF(callback) {
+      var img = document.getElementById('logoImg');
+      var url = img.getAttribute('src');
+      if (url.startsWith('data:')) {
+        callback();
+        return;
+      }
+      toDataURL(url, function(dataUrl) {
+        if (dataUrl) {
+          img.setAttribute('src', dataUrl);
+        }
+        callback();
+      });
+    }
+
+    function cargarJugada() {
+      document.getElementById("loadingMsg").style.display = "block";
+      document.getElementById("jugadaCarta").style.display = "none";
+      document.getElementById("printBtn").style.display = "none";
+      document.getElementById("nodata").style.display = "none";
+      if (!jugadaID) {
+        document.getElementById("nodata").style.display = "block";
+        document.getElementById("loadingMsg").style.display = "none";
+        return;
+      }
+      Promise.all([
+        fetch(opensheetUrlJugada).then(resp => resp.json()),
+        fetch(opensheetUrlDetalle).then(resp => resp.json())
+      ])
+      .then(([jugadas, detalles]) => {
+        var jugada = jugadas.find(j => (j.ID == jugadaID || j.id == jugadaID) && (j.ESTADO == "ACTIVO" || j.estado == "ACTIVO"));
+        if (!jugada) {
+          document.getElementById("nodata").style.display = "block";
+          document.getElementById("loadingMsg").style.display = "none";
+          return;
+        }
+        document.getElementById("fecha").textContent = jugada.FECHA || jugada.fecha || "";
+        document.getElementById("hora").textContent = jugada.HORA || jugada.hora || "";
+        document.getElementById("usuario").textContent = jugada.USUARIO || jugada.usuario || "";
+        document.getElementById("observaciones").textContent = jugada.OBSERVACIONES || jugada.observaciones || "";
+        document.getElementById("referencia").textContent = jugada.ID || jugada.id || "";
+        renderBarcode(jugadaID);
+
+        var jugadaKey = (jugada.FECHA || jugada.fecha || "") + (jugada.HORA || jugada.hora || "");
+        var detallesFiltrados = detalles.filter(d => {
+          var dFecha = d.FECHA || d.fecha || "";
+          var dJuega = d.JUEGA || d.juega || "";
+          var estado = d.ESTADO || d.estado || "";
+          return estado === "ACTIVO" && (dFecha + dJuega === jugadaKey);
+        });
+
+        detallesFiltrados.sort(function(a, b){
+          var numA = a.NUMERO || a.numero || "";
+          var numB = b.NUMERO || b.numero || "";
+          var nA = parseInt(numA, 10);
+          var nB = parseInt(numB, 10);
+          if(!isNaN(nA) && !isNaN(nB)) return nA - nB;
+          return numA.localeCompare(numB, 'es', {numeric:true, sensitivity:'base'});
+        });
+
+        var totalNumeros = detallesFiltrados.length;
+        var totalVenta = detallesFiltrados.reduce(function(sum, det) {
+          var val = (det.VALOR || det.valor || "0").toString().replace(",", ".");
+          var num = parseFloat(val);
+          return sum + (isNaN(num) ? 0 : num);
+        }, 0);
+        document.getElementById("totalNumeros").textContent = totalNumeros;
+        document.getElementById("totalVenta").textContent = formatLempirasSinDecimales(totalVenta);
+
+        var detallePages = paginarDetalles(detallesFiltrados, 48, 80);
+        var pagesContainer = document.getElementById("detallePagesContainer");
+        pagesContainer.innerHTML = "";
+
+        detallePages.forEach(function(pageDetalles, idx){
+          var pageDiv = document.createElement("div");
+          pageDiv.className = "detalle-page" + (idx === 0 ? " first" : "");
+          pageDiv.innerHTML = 
+            (idx === 0 ? '<div class="detalle-title">Detalle</div>' : '') +
+            '<div class="detalle-grid-wrapper">' +
+            '<div class="detalle-grid">' +
+            pageDetalles.map(function(det){
+              var numero = det.NUMERO || det.numero || "";
+              var valor = det.VALOR || det.valor || "";
+              var valorFormateado = formatLempirasSinDecimales(parseFloat(valor.toString().replace(",", ".")));
+              return `<div class="detalle-card">
+                <div class="numero"># ${numero}</div>
+                <div class="valor">${valorFormateado}</div>
+              </div>`;
+            }).join('') +
+            '</div></div>';
+          pagesContainer.appendChild(pageDiv);
+        });
+
+        document.getElementById("jugadaCarta").style.display = "block";
+        document.getElementById("loadingMsg").style.display = "none";
+        document.getElementById("printBtn").style.display = "block";
+      })
+      .catch(function(e){
+        document.getElementById("nodata").style.display = "block";
+        document.getElementById("loadingMsg").style.display = "none";
+        document.getElementById("jugadaCarta").style.display = "block";
+        document.getElementById("printBtn").style.display = "none";
+      });
+    }
+
+    window.onload = cargarJugada;
+
+    function isMobileDevice() {
+      return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent);
+    }
+
+    document.getElementById("printBtn").onclick = function() {
+      if (isMobileDevice()) {
+        prepareLogoForPDF(function() {
+          var element = document.getElementById("jugadaCarta");
+          var opt = {
+            margin: [0.4, 0.3, 0.7, 0.3],
+            filename: 'jugada.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+          };
+          html2pdf().set(opt).from(element).outputPdf('blob').then(function(pdfBlob){
+            if (navigator.canShare && navigator.canShare({ files: [new File([pdfBlob], 'jugada.pdf', { type: 'application/pdf' })] })) {
+              navigator.share({
+                files: [new File([pdfBlob], 'jugada.pdf', { type: 'application/pdf' })],
+                title: 'Resumen de Jugada',
+                text: 'Aquí está el archivo PDF de la jugada.'
+              }).catch(function(){});
+            } else {
+              var url = URL.createObjectURL(pdfBlob);
+              var a = document.createElement('a');
+              a.href = url;
+              a.download = 'jugada.pdf';
+              document.body.appendChild(a);
+              a.click();
+              setTimeout(function() {
+                URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+              }, 500);
+            }
+          });
+        });
+      } else {
+        window.print();
+      }
+    };
+
+    function updateExportButton() {
+      var btn = document.getElementById("printBtn");
+      if (isMobileDevice()) {
+        btn.textContent = "Compartir PDF";
+      } else {
+        btn.textContent = "Imprimir";
+        btn.onclick = function() {
+          window.print();
         };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Obtener parámetros de la URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const jugadaID = urlParams.get('id');
-        const fechaParam = urlParams.get('fecha');
-        const usuarioParam = urlParams.get('usuario');
-
-        console.log('Parámetros recibidos:', { jugadaID, fechaParam, usuarioParam });
-
-        async function cargarReporte() {
-            try {
-                const pagesContainer = document.getElementById('pagesContainer');
-                
-                // Determinar el tipo de consulta
-                let jugadas = [];
-                
-                if (jugadaID) {
-                    // Consulta por ID específico
-                    console.log('Buscando jugada por ID:', jugadaID);
-                    const jugadasRef = collection(db, 'jugadas');
-                    const q = query(jugadasRef, where('__name__', '==', jugadaID));
-                    const querySnapshot = await getDocs(q);
-                    
-                    querySnapshot.forEach((doc) => {
-                        jugadas.push({ id: doc.id, ...doc.data() });
-                    });
-                } else if (fechaParam) {
-                    // Consulta por fecha y opcionalmente usuario
-                    console.log('Buscando jugadas por fecha:', fechaParam, 'y usuario:', usuarioParam);
-                    const jugadasRef = collection(db, 'jugadas');
-                    let q;
-                    
-                    if (usuarioParam) {
-                        q = query(
-                            jugadasRef,
-                            where('FECHA', '==', fechaParam),
-                            where('USUARIO', '==', usuarioParam),
-                            orderBy('HORA', 'desc')
-                        );
-                    } else {
-                        q = query(
-                            jugadasRef,
-                            where('FECHA', '==', fechaParam),
-                            orderBy('HORA', 'desc')
-                        );
-                    }
-                    
-                    const querySnapshot = await getDocs(q);
-                    querySnapshot.forEach((doc) => {
-                        jugadas.push({ id: doc.id, ...doc.data() });
-                    });
-                }
-
-                console.log('Jugadas encontradas:', jugadas.length);
-
-                if (jugadas.length === 0) {
-                    pagesContainer.innerHTML = '<div class="error">No se encontraron datos para los parámetros especificados.</div>';
-                    return;
-                }
-
-                // Verificar si hay una sola jugada específica
-                const url = window.location.href;
-                const isSingleReport = url.startsWith('https://rimedhn.github.io/gestiondenumeros/reportejugada.html?id=');
-
-                if (isSingleReport && jugadas.length === 1) {
-                    // Reporte de una sola jugada
-                    generarReporteIndividual(jugadas[0], pagesContainer);
-                } else {
-                    // Reporte múltiple
-                    generarReporteMultiple(jugadas, pagesContainer);
-                }
-
-            } catch (error) {
-                console.error('Error al cargar el reporte:', error);
-                document.getElementById('pagesContainer').innerHTML = 
-                    `<div class="error">Error al cargar los datos: ${error.message}</div>`;
-            }
-        }
-
-        function generarReporteIndividual(jugada, container) {
-            if (!jugadaID) {
-                container.innerHTML = '<div class="error">ID de jugada no especificado.</div>';
-                return;
-            }
-
-            const jugadaEncontrada = jugadas.find(j => j.id === jugadaID);
-            
-            if (!jugadaEncontrada) {
-                container.innerHTML = '<div class="error">Jugada no encontrada.</div>';
-                return;
-            }
-
-            const jugada = jugadaEncontrada;
-            const detalles = jugada.DETALLES || jugada.detalles || [];
-            const fecha = jugada.FECHA || jugada.fecha || 'N/A';
-            const hora = jugada.HORA || jugada.hora || 'N/A';
-            const usuario = jugada.USUARIO || jugada.usuario || 'N/A';
-            const observaciones = jugada.OBSERVACIONES || jugada.observaciones || '';
-            const jugadaId = jugada.ID || jugada.id || jugadaID;
-
-            let total = 0;
-            let detallesHTML = '';
-
-            // Formatear fecha para mostrar
-            const fechaFormateada = fecha !== 'N/A' ? new Date(fecha + 'T00:00:00').toLocaleDateString('es-ES', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            }) : fecha;
-
-            detalles.forEach(det => {
-                const estado = det.ESTADO || det.estado || 'ACTIVO';
-                
-                // Filtrar registros ANULADO
-                if (estado === 'ANULADO') {
-                    return;
-                }
-
-                const numero = det.NUMERO || det.numero || 'N/A';
-                const valor = parseFloat(det.VALOR || det.valor || 0);
-                
-                if (!isNaN(valor)) {
-                    total += valor;
-                }
-
-                const estadoBadge = estado === 'ACTIVO' 
-                    ? '<span class="estado-badge estado-activo">Activo</span>'
-                    : '<span class="estado-badge estado-anulado">Anulado</span>';
-
-                detallesHTML += `
-                    <tr>
-                        <td class="numero">${numero}</td>
-                        <td class="monto">RD$ ${valor.toFixed(2)}</td>
-                        <td>${estadoBadge}</td>
-                    </tr>
-                `;
-            });
-
-            const observacionesHTML = observaciones ? `
-                <div class="observaciones-section">
-                    <div class="observaciones-label">Observaciones:</div>
-                    <div class="observaciones-text">${observaciones}</div>
-                </div>
-            ` : '';
-
-            const page = document.createElement('div');
-            page.className = 'page';
-            page.innerHTML = `
-                <div class="main-content">
-                    <div class="header">
-                        <div class="logo-container">
-                            <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
-                        </div>
-                        <div class="company-name">SISTEMA DE GESTIÓN</div>
-                        <div class="report-title">Reporte de Jugada</div>
-                    </div>
-
-                    <div class="info-section">
-                        <div class="info-row">
-                            <span class="info-label">ID de Jugada:</span>
-                            <span class="info-value">${jugadaId}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Fecha:</span>
-                            <span class="info-value">${fechaFormateada}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Hora:</span>
-                            <span class="info-value">${hora}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Usuario:</span>
-                            <span class="info-value">${usuario}</span>
-                        </div>
-                    </div>
-
-                    ${observacionesHTML}
-
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Número</th>
-                                    <th>Monto</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${detallesHTML}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="total-section">
-                        <div class="total-row">
-                            <span class="total-label">Total:</span>
-                            <span class="total-value">RD$ ${total.toFixed(2)}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="footer">
-                    <div>Gracias por su confianza</div>
-                    <div class="footer-info">
-                        <div id="fechaimpresion">Impreso el: ${new Date().toLocaleString('es-ES')}</div>
-                    </div>
-                </div>
-            `;
-
-            container.innerHTML = '';
-            container.appendChild(page);
-        }
-
-        function generarReporteMultiple(jugadas, container) {
-            container.innerHTML = '';
-            let totalGeneral = 0;
-
-            jugadas.forEach((jugada, index) => {
-                const detalles = jugada.DETALLES || jugada.detalles || [];
-                const fecha = jugada.FECHA || jugada.fecha || 'N/A';
-                const hora = jugada.HORA || jugada.hora || 'N/A';
-                const usuario = jugada.USUARIO || jugada.usuario || 'N/A';
-                const observaciones = jugada.OBSERVACIONES || jugada.observaciones || '';
-                const jugadaId = jugada.ID || jugada.id || jugada.id;
-
-                let totalJugada = 0;
-                let detallesHTML = '';
-
-                const fechaFormateada = fecha !== 'N/A' ? new Date(fecha + 'T00:00:00').toLocaleDateString('es-ES', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                }) : fecha;
-
-                detalles.forEach(det => {
-                    const estado = det.ESTADO || det.estado || 'ACTIVO';
-                    
-                    // Filtrar registros ANULADO
-                    if (estado === 'ANULADO') {
-                        return;
-                    }
-
-                    const numero = det.NUMERO || det.numero || 'N/A';
-                    const valor = parseFloat(det.VALOR || det.valor || 0);
-                    
-                    if (!isNaN(valor)) {
-                        totalJugada += valor;
-                    }
-
-                    const estadoBadge = estado === 'ACTIVO' 
-                        ? '<span class="estado-badge estado-activo">Activo</span>'
-                        : '<span class="estado-badge estado-anulado">Anulado</span>';
-
-                    detallesHTML += `
-                        <tr>
-                            <td class="numero">${numero}</td>
-                            <td class="monto">RD$ ${valor.toFixed(2)}</td>
-                            <td>${estadoBadge}</td>
-                        </tr>
-                    `;
-                });
-
-                totalGeneral += totalJugada;
-
-                const observacionesHTML = observaciones ? `
-                    <div class="observaciones-section">
-                        <div class="observaciones-label">Observaciones:</div>
-                        <div class="observaciones-text">${observaciones}</div>
-                    </div>
-                ` : '';
-
-                const page = document.createElement('div');
-                page.className = 'page';
-                page.innerHTML = `
-                    <div class="main-content">
-                        <div class="header">
-                            <div class="logo-container">
-                                <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
-                            </div>
-                            <div class="company-name">SISTEMA DE GESTIÓN</div>
-                            <div class="report-title">Reporte de Jugada ${index + 1} de ${jugadas.length}</div>
-                        </div>
-
-                        <div class="info-section">
-                            <div class="info-row">
-                                <span class="info-label">ID de Jugada:</span>
-                                <span class="info-value">${jugadaId}</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Fecha:</span>
-                                <span class="info-value">${fechaFormateada}</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Hora:</span>
-                                <span class="info-value">${hora}</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Usuario:</span>
-                                <span class="info-value">${usuario}</span>
-                            </div>
-                        </div>
-
-                        ${observacionesHTML}
-
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Número</th>
-                                        <th>Monto</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${detallesHTML}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="total-section">
-                            <div class="total-row">
-                                <span class="total-label">Total de esta jugada:</span>
-                                <span class="total-value">RD$ ${totalJugada.toFixed(2)}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    ${index === jugadas.length - 1 ? `
-                        <div class="grand-total-section">
-                            <div class="grand-total-row">
-                                <span class="grand-total-label">TOTAL GENERAL (${jugadas.length} jugadas):</span>
-                                <span class="grand-total-value">RD$ ${totalGeneral.toFixed(2)}</span>
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    <div class="footer">
-                        <div>Gracias por su confianza</div>
-                        <div class="footer-info">
-                            <div id="fechaimpresion">Impreso el: ${new Date().toLocaleString('es-ES')}</div>
-                        </div>
-                    </div>
-                `;
-
-                container.appendChild(page);
-            });
-        }
-
-        // Cargar el reporte cuando se cargue la página
-        window.addEventListener('load', cargarReporte);
-    </script>
+      }
+    }
+    updateExportButton();
+  </script>
 </body>
 </html>
