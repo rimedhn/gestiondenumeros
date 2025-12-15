@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Resumen de Jugada - Gestión de Números</title>
-  <link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" type="image/x-icon">
+  <link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg? raw=true" type="image/x-icon">
   <style>
     @page {
       size: letter;
-      margin: 0.7in 0.5in 1.1in 0.5in;
+      margin: 0.7in 0.5in 1. 1in 0.5in;
     }
     body {
       font-family: Arial, sans-serif;
@@ -29,7 +29,7 @@
       text-align: center;
       font-size: 1.25em;
       color: #226;
-      margin:  24px 0;
+      margin: 24px 0;
       font-weight: bold;
       letter-spacing: 1px;
     }
@@ -67,7 +67,7 @@
       align-items: flex-start;
     }
     .titulo-negocio {
-      font-size:  1.48em;
+      font-size: 1.48em;
       font-weight:  bold;
       color: #333;
       margin-bottom: 3px;
@@ -99,10 +99,10 @@
       height: 70px !important;
       object-fit: contain;
       display: block;
-      margin: 0 0 2px auto;
+      margin:  0 0 2px auto;
     }
     .codigo-jugada {
-      font-size:  0.95em;
+      font-size: 0.95em;
       color: #777;
       margin-top: 0px;
       text-align: right;
@@ -111,8 +111,8 @@
     .info-table {
       width: 100%;
       margin-bottom: 15px;
-      border-collapse: collapse;
-      font-size: 1.08em;
+      border-collapse:  collapse;
+      font-size: 1. 08em;
       page-break-inside: avoid;
       break-inside: avoid;
     }
@@ -147,7 +147,7 @@
       font-weight: bold;
       font-size: 1.15em;
       margin:  2px 0 8px 0;
-      color:  #444;
+      color: #444;
       letter-spacing: 1px;
       page-break-inside: avoid;
       break-inside: avoid;
@@ -160,9 +160,9 @@
     }
     .detalle-grid {
       display: grid;
-      grid-template-columns: repeat(8, 1fr);
+      grid-template-columns:  repeat(8, 1fr);
       gap: 14px;
-      margin-bottom: 14px;
+      margin-bottom:  14px;
       width: 100%;
       page-break-inside: avoid;
       break-inside: avoid;
@@ -182,7 +182,7 @@
     }
     . numero {
       font-size: 1.2em;
-      font-weight:  bold;
+      font-weight: bold;
       color: #266;
       margin-bottom: 4px;
       word-break: break-word;
@@ -196,7 +196,7 @@
     .observaciones {
       background: #f1f1f1;
       padding: 9px 12px;
-      border-radius: 4px;
+      border-radius:  4px;
       font-size: 1em;
       color: #444;
       margin-bottom: 8px;
@@ -210,11 +210,11 @@
       color: #888;
       margin-top: 12px;
     }
-    . no-data {
+    .no-data {
       text-align: center;
       color: #b00;
       font-size: 1.05em;
-      margin-top: 10px;
+      margin-top:  10px;
     }
     #printBtn {
       display: none;
@@ -262,8 +262,8 @@
       }
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min. js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode. all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 </head>
 <body>
   <div id="loadingMsg">CARGANDO DATOS...</div>
@@ -272,7 +272,7 @@
     <div class="main-content">
       <div class="header-row">
         <div class="header-left">
-          <img class="logo-img" id="logoImg" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Logo Gestión de Números" />
+          <img class="logo-img" id="logoImg" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg? raw=true" alt="Logo Gestión de Números" />
           <div class="header-business">
             <div class="titulo-negocio">GESTIÓN DE NÚMEROS</div>
             <div class="resumen-label">Resumen de Jugada</div>
@@ -315,7 +315,7 @@
     <div class="footer">
       <span id="fechaimpresion"></span>
     </div>
-    <div id="nodata" class="no-data" style="display:none;">
+    <div id="nodata" class="no-data" style="display: none;">
       No se encontró información activa para esta jugada.
     </div>
   </div>
@@ -401,7 +401,7 @@
     function cargarJugada() {
       document.getElementById("loadingMsg").style.display = "block";
       document.getElementById("jugadaCarta").style.display = "none";
-      document. getElementById("printBtn").style.display = "none";
+      document.getElementById("printBtn").style.display = "none";
       document.getElementById("nodata").style.display = "none";
       if (! jugadaID) {
         document.getElementById("nodata").style.display = "block";
@@ -414,7 +414,7 @@
         fetch(opensheetUrlVentas).then(resp => resp.json())
       ])
       .then(([jugadas, detalles, ventas]) => {
-        var jugada = jugadas. find(j => (j.ID == jugadaID || j.id == jugadaID) && (j. ESTADO == "ACTIVO" || j.estado == "ACTIVO"));
+        var jugada = jugadas.find(j => (j.ID == jugadaID || j. id == jugadaID) && (j. ESTADO == "ACTIVO" || j.estado == "ACTIVO"));
         if (!jugada) {
           document.getElementById("nodata").style.display = "block";
           document.getElementById("loadingMsg").style.display = "none";
@@ -456,7 +456,7 @@
           var numB = b.NUMERO || b.numero || "";
           var nA = parseInt(numA, 10);
           var nB = parseInt(numB, 10);
-          if(! isNaN(nA) && !isNaN(nB)) return nA - nB;
+          if(!isNaN(nA) && !isNaN(nB)) return nA - nB;
           return numA.localeCompare(numB, 'es', {numeric: true, sensitivity:'base'});
         });
 
@@ -511,22 +511,22 @@
       return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent);
     }
 
-    document.getElementById("printBtn").onclick = function() {
+    document. getElementById("printBtn").onclick = function() {
       if (isMobileDevice()) {
         prepareLogoForPDF(function() {
           var element = document.getElementById("jugadaCarta");
           var opt = {
             margin: [0.4, 0.3, 0.7, 0.3],
-            filename: 'jugada.pdf',
+            filename: 'jugada. pdf',
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            jsPDF: { unit:  'in', format: 'letter', orientation: 'portrait' }
           };
           html2pdf().set(opt).from(element).outputPdf('blob').then(function(pdfBlob){
             if (navigator.canShare && navigator.canShare({ files: [new File([pdfBlob], 'jugada.pdf', { type: 'application/pdf' })] })) {
-              navigator.share({
+              navigator. share({
                 files: [new File([pdfBlob], 'jugada.pdf', { type: 'application/pdf' })],
-                title: 'Resumen de Jugada',
+                title:  'Resumen de Jugada',
                 text: 'Aquí está el archivo PDF de la jugada.'
               }).catch(function(){});
             } else {
@@ -534,7 +534,7 @@
               var a = document.createElement('a');
               a.href = url;
               a.download = 'jugada.pdf';
-              document. body.appendChild(a);
+              document.body.appendChild(a);
               a.click();
               setTimeout(function() {
                 URL.revokeObjectURL(url);
@@ -555,7 +555,7 @@
       } else {
         btn.textContent = "Imprimir";
         btn.onclick = function() {
-          window.print();
+          window. print();
         };
       }
     }
