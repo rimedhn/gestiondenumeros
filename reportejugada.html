@@ -1,10 +1,10 @@
-<! DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Resumen de Jugada - Gestión de Números</title>
-  <link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg? raw=true" type="image/x-icon">
+  <link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" type="image/x-icon">
   <style>
     @page {
       size: letter;
@@ -14,7 +14,7 @@
       font-family: Arial, sans-serif;
       background:  #fff;
       margin: 0;
-      padding: 0;
+      padding:  0;
     }
     .jugada-carta {
       width: 8in;
@@ -68,7 +68,7 @@
     }
     .titulo-negocio {
       font-size: 1.48em;
-      font-weight:  bold;
+      font-weight: bold;
       color: #333;
       margin-bottom: 3px;
       margin-top: 7px;
@@ -88,7 +88,7 @@
       align-items: flex-end;
       width: 47%;
       min-width:  200px;
-      margin-top:  7px;
+      margin-top: 7px;
     }
     .barcode-container {
       text-align: right;
@@ -102,7 +102,7 @@
       margin:  0 0 2px auto;
     }
     .codigo-jugada {
-      font-size: 0.95em;
+      font-size:  0.95em;
       color: #777;
       margin-top: 0px;
       text-align: right;
@@ -112,7 +112,7 @@
       width: 100%;
       margin-bottom: 15px;
       border-collapse:  collapse;
-      font-size: 1. 08em;
+      font-size:  1. 08em;
       page-break-inside: avoid;
       break-inside: avoid;
     }
@@ -130,15 +130,15 @@
       vertical-align: top;
       padding-bottom: 3px;
     }
-    .info-value {
+    . info-value {
       font-size: 1em;
       color: #222;
       padding-bottom: 3px;
     }
     .detalle-section,
     .detalle-page {
-      page-break-inside: avoid;
-      break-inside: avoid;
+      page-break-inside:  avoid;
+      break-inside:  avoid;
       width: 100%;
       margin-bottom: 0;
     }
@@ -162,7 +162,7 @@
       display: grid;
       grid-template-columns:  repeat(8, 1fr);
       gap: 14px;
-      margin-bottom:  14px;
+      margin-bottom: 14px;
       width: 100%;
       page-break-inside: avoid;
       break-inside: avoid;
@@ -183,7 +183,7 @@
     . numero {
       font-size: 1.2em;
       font-weight: bold;
-      color: #266;
+      color:  #266;
       margin-bottom: 4px;
       word-break: break-word;
     }
@@ -196,7 +196,7 @@
     .observaciones {
       background: #f1f1f1;
       padding: 9px 12px;
-      border-radius:  4px;
+      border-radius: 4px;
       font-size: 1em;
       color: #444;
       margin-bottom: 8px;
@@ -210,16 +210,16 @@
       color: #888;
       margin-top: 12px;
     }
-    .no-data {
+    . no-data {
       text-align: center;
-      color: #b00;
-      font-size: 1.05em;
+      color:  #b00;
+      font-size:  1.05em;
       margin-top:  10px;
     }
     #printBtn {
       display: none;
-      margin:  18px auto 0 auto;
-      font-size: 1.1em;
+      margin: 18px auto 0 auto;
+      font-size:  1.1em;
       padding: 8px 24px;
       background: #226;
       color: #fff;
@@ -228,14 +228,14 @@
       cursor: pointer;
       font-weight: bold;
       letter-spacing: 1px;
-      box-shadow: 0 2px 6px #aaa2;
+      box-shadow:  0 2px 6px #aaa2;
     }
     #printBtn:active {
       background: #144;
     }
     @media print {
       #printBtn, #loadingMsg {
-        display: none ! important;
+        display:  none !important;
       }
       .jugada-carta {
         background: #fff !important;
@@ -248,17 +248,17 @@
       .detalle-title, 
       .detalle-grid-wrapper, 
       .detalle-grid, 
-      .detalle-card {
+      . detalle-card {
         page-break-inside: avoid;
         break-inside: avoid;
       }
       .detalle-page {
-        page-break-before: always;
+        page-break-before:  always;
         break-before: page;
       }
-      .detalle-page. first {
+      .detalle-page.first {
         page-break-before: auto ! important;
-        break-before: auto !important;
+        break-before:  auto !important;
       }
     }
   </style>
@@ -332,7 +332,7 @@
     document.getElementById("idjugada").textContent = jugadaID || "";
 
     var now = new Date();
-    document.querySelector(". footer #fechaimpresion").textContent =
+    document.querySelector(".footer #fechaimpresion").textContent =
       "Impreso:  " + now.toLocaleDateString() + " " + now.toLocaleTimeString();
 
     function renderBarcode(id) {
@@ -386,7 +386,7 @@
     function prepareLogoForPDF(callback) {
       var img = document.getElementById('logoImg');
       var url = img.getAttribute('src');
-      if (url. startsWith('data:')) {
+      if (url.startsWith('data:')) {
         callback();
         return;
       }
@@ -414,7 +414,7 @@
         fetch(opensheetUrlVentas).then(resp => resp.json())
       ])
       .then(([jugadas, detalles, ventas]) => {
-        var jugada = jugadas.find(j => (j.ID == jugadaID || j. id == jugadaID) && (j. ESTADO == "ACTIVO" || j.estado == "ACTIVO"));
+        var jugada = jugadas.find(j => (j.ID == jugadaID || j.id == jugadaID) && (j. ESTADO == "ACTIVO" || j.estado == "ACTIVO"));
         if (!jugada) {
           document.getElementById("nodata").style.display = "block";
           document.getElementById("loadingMsg").style.display = "none";
@@ -456,7 +456,7 @@
           var numB = b.NUMERO || b.numero || "";
           var nA = parseInt(numA, 10);
           var nB = parseInt(numB, 10);
-          if(!isNaN(nA) && !isNaN(nB)) return nA - nB;
+          if(! isNaN(nA) && !isNaN(nB)) return nA - nB;
           return numA.localeCompare(numB, 'es', {numeric: true, sensitivity:'base'});
         });
 
@@ -471,10 +471,10 @@
 
         var detallePages = paginarDetalles(detallesFiltrados, 48, 80);
         var pagesContainer = document.getElementById("detallePagesContainer");
-        pagesContainer.innerHTML = "";
+        pagesContainer. innerHTML = "";
 
         detallePages.forEach(function(pageDetalles, idx){
-          var pageDiv = document.createElement("div");
+          var pageDiv = document. createElement("div");
           pageDiv.className = "detalle-page" + (idx === 0 ?  " first" : "");
           pageDiv.innerHTML = 
             (idx === 0 ? '<div class="detalle-title">Detalle</div>' : '') +
@@ -511,7 +511,7 @@
       return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent);
     }
 
-    document. getElementById("printBtn").onclick = function() {
+    document.getElementById("printBtn").onclick = function() {
       if (isMobileDevice()) {
         prepareLogoForPDF(function() {
           var element = document.getElementById("jugadaCarta");
@@ -519,14 +519,14 @@
             margin: [0.4, 0.3, 0.7, 0.3],
             filename: 'jugada. pdf',
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit:  'in', format: 'letter', orientation: 'portrait' }
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
           };
           html2pdf().set(opt).from(element).outputPdf('blob').then(function(pdfBlob){
             if (navigator.canShare && navigator.canShare({ files: [new File([pdfBlob], 'jugada.pdf', { type: 'application/pdf' })] })) {
-              navigator. share({
+              navigator.share({
                 files: [new File([pdfBlob], 'jugada.pdf', { type: 'application/pdf' })],
-                title:  'Resumen de Jugada',
+                title: 'Resumen de Jugada',
                 text: 'Aquí está el archivo PDF de la jugada.'
               }).catch(function(){});
             } else {
@@ -555,7 +555,7 @@
       } else {
         btn.textContent = "Imprimir";
         btn.onclick = function() {
-          window. print();
+          window.print();
         };
       }
     }
