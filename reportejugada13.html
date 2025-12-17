@@ -8,43 +8,63 @@
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
 <style>
-@page { size: letter; margin:0.7in; }
+@page { size: letter; margin:0.7in 0.6in 0.9in 0.6in; }
 
-body {
+body{
   font-family: Arial, sans-serif;
   counter-reset: page;
 }
 
-.detalle-grid {
+.header{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  margin-bottom:8px;
+}
+
+.header img{ width:95px; }
+
+.info-grid{
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap:6px 14px;
+  font-size:13px;
+  margin-bottom:10px;
+}
+
+.detalle-grid{
   display:grid;
   grid-template-columns:repeat(8,1fr);
   gap:14px;
 }
 
-.detalle-card {
+.detalle-card{
   border:1px solid #eaeaea;
   border-radius:6px;
-  padding:10px;
+  padding:8px;
   background:#fafafa;
   text-align:center;
   break-inside:avoid;
 }
 
-.footer-print {
-  margin-top:15px;
+.footer-print{
+  position:fixed;
+  bottom:0.3in;
+  left:0.6in;
+  right:0.6in;
   display:flex;
   justify-content:space-between;
-  font-size:12px;
+  font-size:11px;
   color:#555;
 }
 
-.page-counter::after {
+.page-counter::after{
   content:"Página " counter(page) " de " counter(pages);
 }
 
-@media print {
-  body { counter-reset: page; }
-  .page-counter { counter-increment: page; }
+@media print{
+  body{ counter-reset: page; }
+  .page-counter{ counter-increment: page; }
 }
 </style>
 </head>
@@ -53,26 +73,34 @@ body {
 
 <div id="jugadaCarta" style="display:none">
 
-<img src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" width="100">
+  <div class="header">
+    <img src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
+    <div>
+      <h2 style="margin:0">GESTIÓN DE NÚMEROS</h2>
+      <small>Resumen de Jugada</small>
+    </div>
+  </div>
 
-<h2>GESTIÓN DE NÚMEROS</h2>
+  <div class="info-grid">
+    <div><b>ID:</b> <span id="idjugada"></span></div>
+    <div><b>Fecha:</b> <span id="fecha"></span></div>
+    <div><b>Hora:</b> <span id="hora"></span></div>
 
-<p><b>ID:</b> <span id="idjugada"></span></p>
-<p><b>Fecha:</b> <span id="fecha"></span></p>
-<p><b>Hora:</b> <span id="hora"></span></p>
-<p><b>Usuario:</b> <span id="usuario"></span></p>
-<p><b>Total Números:</b> <span id="totalNumeros"></span></p>
-<p><b>Total Venta:</b> <span id="totalVenta"></span></p>
+    <div><b>Usuario:</b> <span id="usuario"></span></div>
+    <div><b>Total Números:</b> <span id="totalNumeros"></span></div>
+    <div><b>Total Venta:</b> <span id="totalVenta"></span></div>
+  </div>
 
-<svg id="barcode"></svg>
+  <svg id="barcode"></svg>
 
-<div id="detallePagesContainer" class="detalle-grid"></div>
+  <h3 style="margin:10px 0 6px 0">Detalle</h3>
+  <div id="detallePagesContainer" class="detalle-grid"></div>
+
+</div>
 
 <div class="footer-print">
   <span id="fechaImpresion"></span>
   <span class="page-counter"></span>
-</div>
-
 </div>
 
 <script>
@@ -97,12 +125,11 @@ Promise.all([
 ]).then(([jugadas,detalles,ventas])=>{
 
   const jugada=jugadas.find(j=>j.ID===id);
-  const user=jugada.USUARIO;
   const clave=normalizarClave(jugada.FECHA,jugada.HORA);
 
   document.getElementById("fecha").textContent=jugada.FECHA;
   document.getElementById("hora").textContent=jugada.HORA;
-  document.getElementById("usuario").textContent=user;
+  document.getElementById("usuario").textContent=jugada.USUARIO;
 
   JsBarcode("#barcode",id,{displayValue:false});
 
@@ -112,7 +139,7 @@ Promise.all([
   const filtrados=detalles.filter(d=>
     normalizarClave(d.FECHA,d.JUEGA)===clave &&
     d.ESTADO==="ACTIVO" &&
-    equalsUser(d.USUARIO,user) &&
+    equalsUser(d.USUARIO,jugada.USUARIO) &&
     (!d.VENTA||ventasMap.get(d.VENTA)==="ACTIVO")
   ).sort((a,b)=>{
     const na=parseInt(a.NUMERO),nb=parseInt(b.NUMERO);
@@ -121,6 +148,7 @@ Promise.all([
 
   let totalVenta=0;
   const cont=document.getElementById("detallePagesContainer");
+
   filtrados.forEach(d=>{
     const val=parseFloat(d.VALOR);
     totalVenta+=isNaN(val)?0:val;
@@ -137,9 +165,10 @@ Promise.all([
     "Impreso: "+new Date().toLocaleString();
 
   document.getElementById("jugadaCarta").style.display="block";
-  setTimeout(()=>window.print(),800);
+  setTimeout(()=>window.print(),700);
 });
 </script>
 </body>
 </html>
+
 
