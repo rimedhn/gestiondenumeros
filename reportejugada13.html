@@ -4,11 +4,16 @@
 <meta charset="UTF-8">
 <title>Resumen de Jugada</title>
 
+<link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
 <style>
 @page { size: letter; margin:0.7in; }
-body { font-family:Arial; }
+
+body {
+  font-family: Arial, sans-serif;
+  counter-reset: page;
+}
 
 .detalle-grid {
   display:grid;
@@ -20,24 +25,26 @@ body { font-family:Arial; }
   border:1px solid #eaeaea;
   border-radius:6px;
   padding:10px;
+  background:#fafafa;
   text-align:center;
   break-inside:avoid;
 }
 
 .footer-print {
+  margin-top:15px;
   display:flex;
   justify-content:space-between;
-  margin-top:20px;
   font-size:12px;
   color:#555;
 }
 
+.page-counter::after {
+  content:"Página " counter(page) " de " counter(pages);
+}
+
 @media print {
   body { counter-reset: page; }
-  .page-counter::after {
-    counter-increment: page;
-    content:"Página " counter(page) " de " counter(pages);
-  }
+  .page-counter { counter-increment: page; }
 }
 </style>
 </head>
@@ -46,12 +53,16 @@ body { font-family:Arial; }
 
 <div id="jugadaCarta" style="display:none">
 
+<img src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" width="100">
+
 <h2>GESTIÓN DE NÚMEROS</h2>
 
-<p>ID: <span id="idjugada"></span></p>
-<p>Fecha: <span id="fecha"></span></p>
-<p>Hora: <span id="hora"></span></p>
-<p>Usuario: <span id="usuario"></span></p>
+<p><b>ID:</b> <span id="idjugada"></span></p>
+<p><b>Fecha:</b> <span id="fecha"></span></p>
+<p><b>Hora:</b> <span id="hora"></span></p>
+<p><b>Usuario:</b> <span id="usuario"></span></p>
+<p><b>Total Números:</b> <span id="totalNumeros"></span></p>
+<p><b>Total Venta:</b> <span id="totalVenta"></span></p>
 
 <svg id="barcode"></svg>
 
@@ -65,70 +76,70 @@ body { font-family:Arial; }
 </div>
 
 <script>
-const URL_JUGADA  = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/JUGADA";
-const URL_DETALLE = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/DETALLE";
-const URL_VENTAS  = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/VENTAS";
+const URL_JUGADA="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/JUGADA";
+const URL_DETALLE="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/DETALLE";
+const URL_VENTAS="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/VENTAS";
 
-const getParam = p => new URLSearchParams(location.search).get(p);
+const id=new URLSearchParams(location.search).get("id");
+document.getElementById("idjugada").textContent=id;
 
 function normalizarClave(f,h){
   return (f+" "+h).trim().replace(/\s+/g," ").toUpperCase();
 }
 function equalsUser(a,b){
-  return (a||"").trim().toUpperCase() === (b||"").trim().toUpperCase();
+  return (a||"").trim().toUpperCase()===(b||"").trim().toUpperCase();
 }
-
-const id = getParam("id");
-document.getElementById("idjugada").textContent = id;
 
 Promise.all([
   fetch(URL_JUGADA).then(r=>r.json()),
   fetch(URL_DETALLE).then(r=>r.json()),
   fetch(URL_VENTAS).then(r=>r.json())
-]).then(([jugadas, detalles, ventas])=>{
+]).then(([jugadas,detalles,ventas])=>{
 
-  const jugada = jugadas.find(j=>j.ID==id);
-  const user = jugada.USUARIO;
-  const clave = normalizarClave(jugada.FECHA,jugada.HORA);
+  const jugada=jugadas.find(j=>j.ID===id);
+  const user=jugada.USUARIO;
+  const clave=normalizarClave(jugada.FECHA,jugada.HORA);
 
-  document.getElementById("fecha").textContent = jugada.FECHA;
-  document.getElementById("hora").textContent = jugada.HORA;
-  document.getElementById("usuario").textContent = user;
+  document.getElementById("fecha").textContent=jugada.FECHA;
+  document.getElementById("hora").textContent=jugada.HORA;
+  document.getElementById("usuario").textContent=user;
 
-  JsBarcode("#barcode", id, {displayValue:false});
+  JsBarcode("#barcode",id,{displayValue:false});
 
-  const ventasMap = new Map();
+  const ventasMap=new Map();
   ventas.forEach(v=>ventasMap.set(v.ID,v.ESTADO));
 
-  const filtrados = detalles.filter(d=>{
-    return normalizarClave(d.FECHA,d.JUEGA)===clave &&
-           d.ESTADO==="ACTIVO" &&
-           equalsUser(d.USUARIO,user) &&
-           (!d.VENTA || ventasMap.get(d.VENTA)==="ACTIVO");
+  const filtrados=detalles.filter(d=>
+    normalizarClave(d.FECHA,d.JUEGA)===clave &&
+    d.ESTADO==="ACTIVO" &&
+    equalsUser(d.USUARIO,user) &&
+    (!d.VENTA||ventasMap.get(d.VENTA)==="ACTIVO")
+  ).sort((a,b)=>{
+    const na=parseInt(a.NUMERO),nb=parseInt(b.NUMERO);
+    return (!isNaN(na)&&!isNaN(nb))?na-nb:a.NUMERO.localeCompare(b.NUMERO);
   });
 
-  filtrados.sort((a,b)=>{
-    const na=parseInt(a.NUMERO), nb=parseInt(b.NUMERO);
-    if(!isNaN(na)&&!isNaN(nb)) return na-nb;
-    return a.NUMERO.localeCompare(b.NUMERO);
-  });
-
-  const cont = document.getElementById("detallePagesContainer");
+  let totalVenta=0;
+  const cont=document.getElementById("detallePagesContainer");
   filtrados.forEach(d=>{
-    cont.innerHTML += `
+    const val=parseFloat(d.VALOR);
+    totalVenta+=isNaN(val)?0:val;
+    cont.innerHTML+=`
       <div class="detalle-card">
-        <div>#${d.NUMERO}</div>
-        <div>L ${Math.round(d.VALOR)}</div>
+        <div><b>#${d.NUMERO}</b></div>
+        <div>L ${Math.round(val)}</div>
       </div>`;
   });
 
-  document.getElementById("fechaImpresion").textContent =
-    "Impreso: " + new Date().toLocaleString();
+  document.getElementById("totalNumeros").textContent=filtrados.length;
+  document.getElementById("totalVenta").textContent="L "+Math.round(totalVenta);
+  document.getElementById("fechaImpresion").textContent=
+    "Impreso: "+new Date().toLocaleString();
 
   document.getElementById("jugadaCarta").style.display="block";
   setTimeout(()=>window.print(),800);
 });
 </script>
-
 </body>
 </html>
+
