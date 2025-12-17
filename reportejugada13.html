@@ -6,56 +6,101 @@
 
 <link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
 <style>
-@page { size: letter; margin:0.7in 0.6in 0.9in 0.6in; }
+@page{
+  size: letter;
+  margin: 0.7in 0.5in 1.3in 0.5in;
+}
 
 body{
   font-family: Arial, sans-serif;
-  counter-reset: page;
+  margin:0;
+  background:#fff;
 }
 
-.header{
+.jugada-carta{
+  width:8in;
+  margin:auto;
+  padding:0;
+}
+
+.header-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:10px;
+}
+
+.header-left{
   display:flex;
   align-items:center;
   gap:15px;
+}
+
+.logo-img{
+  width:100px;
+}
+
+.header-business h2{
+  margin:0;
+}
+
+.header-right{
+  text-align:right;
+}
+
+.info-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
   margin-bottom:8px;
 }
 
-.header img{ width:95px; }
+.info-table td{
+  padding:4px 8px;
+}
 
-.info-grid{
-  display:grid;
-  grid-template-columns: repeat(3,1fr);
-  gap:6px 14px;
-  font-size:13px;
-  margin-bottom:10px;
+.detalle-title{
+  text-align:center;
+  font-weight:bold;
+  margin:6px 0;
 }
 
 .detalle-grid{
   display:grid;
   grid-template-columns:repeat(8,1fr);
-  gap:14px;
+  gap:12px;
 }
 
 .detalle-card{
-  border:1px solid #eaeaea;
-  border-radius:6px;
+  border:1px solid #ddd;
   padding:8px;
-  background:#fafafa;
+  border-radius:6px;
   text-align:center;
   break-inside:avoid;
 }
 
+.numero{
+  font-weight:bold;
+  font-size:1.15em;
+  color:#266;
+}
+
+.valor{
+  color:#444;
+}
+
 .footer-print{
   position:fixed;
-  bottom:0.3in;
-  left:0.6in;
-  right:0.6in;
+  bottom:0.2in;
+  left:0.5in;
+  right:0.5in;
   display:flex;
   justify-content:space-between;
   font-size:11px;
-  color:#555;
+  color:#666;
 }
 
 .page-counter::after{
@@ -63,41 +108,57 @@ body{
 }
 
 @media print{
-  body{ counter-reset: page; }
-  .page-counter{ counter-increment: page; }
+  .detalle-card,
+  .detalle-grid,
+  .detalle-title,
+  table{
+    break-inside:avoid;
+    page-break-inside:avoid;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div id="jugadaCarta" style="display:none">
+<div class="jugada-carta" id="jugadaCarta">
 
-  <div class="header">
-    <img src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
-    <div>
-      <h2 style="margin:0">GESTIÓN DE NÚMEROS</h2>
-      <small>Resumen de Jugada</small>
+  <!-- ENCABEZADO -->
+  <div class="header-row">
+    <div class="header-left">
+      <img class="logo-img" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
+      <div class="header-business">
+        <h2>GESTIÓN DE NÚMEROS</h2>
+        <div>Resumen de Jugada</div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <svg id="barcode"></svg>
+      <div>ID Jugada: <span id="idjugada"></span></div>
     </div>
   </div>
 
-  <div class="info-grid">
-    <div><b>ID:</b> <span id="idjugada"></span></div>
-    <div><b>Fecha:</b> <span id="fecha"></span></div>
-    <div><b>Hora:</b> <span id="hora"></span></div>
+  <!-- INFO GENERAL -->
+  <table class="info-table">
+    <tr>
+      <td><b>Fecha:</b> <span id="fecha"></span></td>
+      <td><b>Hora:</b> <span id="hora"></span></td>
+      <td><b>Usuario:</b> <span id="usuario"></span></td>
+    </tr>
+    <tr>
+      <td><b>Total Números:</b> <span id="totalNumeros"></span></td>
+      <td><b>Total Venta:</b> <span id="totalVenta"></span></td>
+      <td><b>Observaciones:</b> <span id="observaciones"></span></td>
+    </tr>
+  </table>
 
-    <div><b>Usuario:</b> <span id="usuario"></span></div>
-    <div><b>Total Números:</b> <span id="totalNumeros"></span></div>
-    <div><b>Total Venta:</b> <span id="totalVenta"></span></div>
-  </div>
-
-  <svg id="barcode"></svg>
-
-  <h3 style="margin:10px 0 6px 0">Detalle</h3>
-  <div id="detallePagesContainer" class="detalle-grid"></div>
+  <div class="detalle-title">Detalle</div>
+  <div id="detalleGrid" class="detalle-grid"></div>
 
 </div>
 
+<!-- FOOTER IMPRESIÓN -->
 <div class="footer-print">
   <span id="fechaImpresion"></span>
   <span class="page-counter"></span>
@@ -124,12 +185,14 @@ Promise.all([
   fetch(URL_VENTAS).then(r=>r.json())
 ]).then(([jugadas,detalles,ventas])=>{
 
-  const jugada=jugadas.find(j=>j.ID===id);
-  const clave=normalizarClave(jugada.FECHA,jugada.HORA);
+  const jugada=jugadas.find(j=>j.ID===id && j.ESTADO==="ACTIVO");
+  if(!jugada) return;
 
+  const clave=normalizarClave(jugada.FECHA,jugada.HORA);
   document.getElementById("fecha").textContent=jugada.FECHA;
   document.getElementById("hora").textContent=jugada.HORA;
   document.getElementById("usuario").textContent=jugada.USUARIO;
+  document.getElementById("observaciones").textContent=jugada.OBSERVACIONES||"";
 
   JsBarcode("#barcode",id,{displayValue:false});
 
@@ -141,21 +204,18 @@ Promise.all([
     d.ESTADO==="ACTIVO" &&
     equalsUser(d.USUARIO,jugada.USUARIO) &&
     (!d.VENTA||ventasMap.get(d.VENTA)==="ACTIVO")
-  ).sort((a,b)=>{
-    const na=parseInt(a.NUMERO),nb=parseInt(b.NUMERO);
-    return (!isNaN(na)&&!isNaN(nb))?na-nb:a.NUMERO.localeCompare(b.NUMERO);
-  });
+  ).sort((a,b)=>parseInt(a.NUMERO)-parseInt(b.NUMERO));
 
   let totalVenta=0;
-  const cont=document.getElementById("detallePagesContainer");
+  const grid=document.getElementById("detalleGrid");
 
   filtrados.forEach(d=>{
-    const val=parseFloat(d.VALOR);
-    totalVenta+=isNaN(val)?0:val;
-    cont.innerHTML+=`
+    const val=parseFloat(d.VALOR)||0;
+    totalVenta+=val;
+    grid.innerHTML+=`
       <div class="detalle-card">
-        <div><b>#${d.NUMERO}</b></div>
-        <div>L ${Math.round(val)}</div>
+        <div class="numero">#${d.NUMERO}</div>
+        <div class="valor">L ${Math.round(val)}</div>
       </div>`;
   });
 
@@ -163,12 +223,8 @@ Promise.all([
   document.getElementById("totalVenta").textContent="L "+Math.round(totalVenta);
   document.getElementById("fechaImpresion").textContent=
     "Impreso: "+new Date().toLocaleString();
-
-  document.getElementById("jugadaCarta").style.display="block";
-  setTimeout(()=>window.print(),700);
 });
 </script>
+
 </body>
 </html>
-
-
