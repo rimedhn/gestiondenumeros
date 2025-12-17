@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resumen de Jugada - Gestión de Números</title>
+
+<link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+
+<style>
+/* === ESTILOS ORIGINALES (SIN CAMBIOS) === */
+@page { size: letter; margin: 0.7in 0.5in 1.1in 0.5in; }
+body { font-family: Arial, sans-serif; background:#fff; margin:0; }
+
+.jugada-carta { width:8in; margin:auto; min-height:10in; }
+#loadingMsg { text-align:center; font-size:1.2em; margin:20px; font-weight:bold; }
+.no-data { text-align:center; color:#b00; font-size:1.1em; }
+
+.detalle-grid {
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:14px;
+}
+.detalle-card {
+  border:1px solid #eaeaea;
+  border-radius:6px;
+  padding:10px;
+  text-align:center;
+  background:#fafafa;
+}
+.numero { font-weight:bold; color:#266; }
+.valor { color:#444; }
+</style>
+</head>
+
+<body>
+
+<div id="loadingMsg">CARGANDO DATOS...</div>
+<div id="nodata" class="no-data" style="display:none">
+  No se encontró información activa para esta jugada.
+</div>
+
+<div class="jugada-carta" id="jugadaCarta" style="display:none">
+
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;align-items:center">
+      <img src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" width="90">
+      <div style="margin-left:15px">
+        <h2 style="margin:0">GESTIÓN DE NÚMEROS</h2>
+        <small>Resumen de Jugada</small>
+      </div>
+    </div>
+    <div>
+      <svg id="barcode"></svg>
+      <div>ID Jugada: <b id="idjugada"></b></div>
+    </div>
+  </div>
+
+  <p><b>Fecha:</b> <span id="fecha"></span></p>
+  <p><b>Hora:</b> <span id="hora"></span></p>
+  <p><b>Usuario:</b> <span id="usuario"></span></p>
+  <p><b>Total Números:</b> <span id="totalNumeros"></span></p>
+  <p><b>Total Venta:</b> <span id="totalVenta"></span></p>
+
+  <h3>Detalle</h3>
+  <div id="detallePagesContainer" class="detalle-grid"></div>
+
+</div>
+
+<script>
+/* ================= CONFIG ================= */
+
+const URL_JUGADA  = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/JUGADA";
+const URL_DETALLE = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/DETALLE";
+const URL_VENTAS  = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/VENTAS";
+
+/* ================= HELPERS ================= */
+
+const getParam = p => new URLSearchParams(location.search).get(p);
+
+function normalizarClave(fecha, hora){
+  return (fecha + " " + hora)
+    .toString()
+    .trim()
+    .replace(/\s+/g," ")
+    .toUpperCase();
+}
+
+function equalsUser(a,b){
+  return (a||"").toString().trim().toUpperCase() ===
+         (b||"").toString().trim().toUpperCase();
+}
+
+function showError(msg){
+  document.getElementById("loadingMsg").style.display="none";
+  document.getElementById("jugadaCarta").style.display="none";
+  document.getElementById("nodata").style.display="block";
+  document.getElementById("nodata").textContent=msg;
+}
+
+/* ================= MAIN ================= */
+
+const JUGADA_ID = getParam("id");
+document.getElementById("idjugada").textContent = JUGADA_ID || "";
+
+if(!JUGADA_ID){
+  showError("Debe proporcionar ?id=");
+  throw "";
+}
+
+Promise.all([
+  fetch(URL_JUGADA).then(r=>r.json()),
+  fetch(URL_DETALLE).then(r=>r.json()),
+  fetch(URL_VENTAS).then(r=>r.json())
+]).then(([jugadas, detalles, ventas])=>{
+
+  const jugada = jugadas.find(j =>
+    (j.ID || "").toString().trim() === JUGADA_ID &&
+    (j.ESTADO || "").toUpperCase() === "ACTIVO"
+  );
+
+  if(!jugada){
+    showError("No existe la jugada solicitada");
+    return;
+  }
+
+  const currentUser = jugada.USUARIO || "";
+  const claveJugada = normalizarClave(jugada.FECHA, jugada.HORA);
+
+  document.getElementById("fecha").textContent = jugada.FECHA || "";
+  document.getElementById("hora").textContent  = jugada.HORA || "";
+  document.getElementById("usuario").textContent = currentUser;
+
+  JsBarcode("#barcode", JUGADA_ID, {displayValue:false});
+
+  const ventasMap = new Map();
+  ventas.forEach(v=>{
+    const id = (v.ID || "").toString().trim();
+    const estado = (v.ESTADO || "").toUpperCase().trim();
+    if(id) ventasMap.set(id, estado);
+  });
+
+  const detallesFiltrados = detalles.filter(d=>{
+    const claveDetalle = normalizarClave(d.FECHA, d.JUEGA);
+    const estadoDetalle = (d.ESTADO || "").toUpperCase().trim();
+    const ventaId = (d.VENTA || "").toString().trim();
+    const estadoVenta = ventasMap.get(ventaId);
+
+    return (
+      claveDetalle === claveJugada &&
+      estadoDetalle === "ACTIVO" &&
+      equalsUser(d.USUARIO, currentUser) &&
+      (!ventaId || estadoVenta === "ACTIVO")
+    );
+  });
+
+  if(detallesFiltrados.length === 0){
+    showError("No se encontraron registros activos");
+    return;
+  }
+
+  let totalVenta = 0;
+  const container = document.getElementById("detallePagesContainer");
+
+  detallesFiltrados.forEach(d=>{
+    const num = d.NUMERO || "";
+    const val = parseFloat((d.VALOR || "0").toString().replace(",", "."));
+    totalVenta += isNaN(val)?0:val;
+
+    container.innerHTML += `
+      <div class="detalle-card">
+        <div class="numero">#${num}</div>
+        <div class="valor">L ${Math.round(val)}</div>
+      </div>`;
+  });
+
+  document.getElementById("totalNumeros").textContent = detallesFiltrados.length;
+  document.getElementById("totalVenta").textContent =
+    "L " + Math.round(totalVenta).toLocaleString();
+
+  document.getElementById("loadingMsg").style.display="none";
+  document.getElementById("jugadaCarta").style.display="block";
+
+  setTimeout(()=>{ window.print(); }, 800);
+
+}).catch(()=>{
+  showError("Error cargando los datos");
+});
+</script>
+
+</body>
+</html>
