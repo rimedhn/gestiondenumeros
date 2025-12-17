@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Resumen de Jugada</title>
+
+<link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+<style>
+@page{
+  size: letter;
+  margin: 0.7in 0.5in;
+}
+
+body{
+  font-family: Arial, sans-serif;
+  margin:0;
+}
+
+/* ===== LOADING ===== */
+#loadingOverlay{
+  position:fixed;
+  inset:0;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+.loading-text{
+  font-size:18px;
+  font-weight:bold;
+  color:#226;
+  letter-spacing:1px;
+}
+
+.loading-dots::after{
+  content:"";
+  animation:dots 1.5s infinite;
+}
+
+@keyframes dots{
+  0%{content:"";}
+  33%{content:".";}
+  66%{content:"..";}
+  100%{content:"...";}
+}
+
+/* ===== CONTENT ===== */
+.header-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:8px;
+}
+
+.logo-img{
+  width:95px;
+}
+
+.subtitulo{
+  font-size:13px;
+  color:#555;
+}
+
+.fecha-impresion{
+  font-size:11px;
+  color:#666;
+}
+
+.info-table{
+  width:100%;
+  font-size:14px;
+  margin-bottom:6px;
+}
+
+.detalle-grid{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:12px;
+}
+
+.detalle-card{
+  border:1px solid #ddd;
+  padding:8px;
+  border-radius:6px;
+  text-align:center;
+  break-inside:avoid;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOADING -->
+<div id="loadingOverlay">
+  <div class="loading-text">
+    CARGANDO DATOS, ESPERA UN MOMENTO<span class="loading-dots"></span>
+  </div>
+</div>
+
+<div id="jugadaCarta" style="padding:15px;display:none">
+
+  <div class="header-row">
+    <div style="display:flex;gap:15px">
+      <img class="logo-img" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
+      <div>
+        <h2 style="margin:0">GESTIÓN DE NÚMEROS</h2>
+        <div class="subtitulo">Resumen de Jugada</div>
+        <div class="fecha-impresion" id="fechaImpresion"></div>
+      </div>
+    </div>
+    <div>
+      <svg id="barcode"></svg>
+    </div>
+  </div>
+
+  <table class="info-table">
+    <tr>
+      <td><b>Fecha:</b> <span id="fecha"></span></td>
+      <td><b>Hora:</b> <span id="hora"></span></td>
+      <td><b>Usuario:</b> <span id="usuario"></span></td>
+    </tr>
+    <tr>
+      <td><b>Total Números:</b> <span id="totalNumeros"></span></td>
+      <td><b>Total Venta:</b> <span id="totalVenta"></span></td>
+      <td><b>Observaciones:</b> <span id="observaciones"></span></td>
+    </tr>
+  </table>
+
+  <h3 style="margin:6px 0">Detalle</h3>
+  <div id="detalleGrid" class="detalle-grid"></div>
+
+</div>
+
+<script>
+const URL_JUGADA="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/JUGADA";
+const URL_DETALLE="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/DETALLE";
+const URL_VENTAS="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/VENTAS";
+
+const id=new URLSearchParams(location.search).get("id");
+
+function normalizarClave(f,h){
+  return (f+" "+h).trim().replace(/\s+/g," ").toUpperCase();
+}
+function equalsUser(a,b){
+  return (a||"").trim().toUpperCase()===(b||"").trim().toUpperCase();
+}
+
+Promise.all([
+  fetch(URL_JUGADA).then(r=>r.json()),
+  fetch(URL_DETALLE).then(r=>r.json()),
+  fetch(URL_VENTAS).then(r=>r.json())
+]).then(([jugadas,detalles,ventas])=>{
+
+  const jugada=jugadas.find(j=>j.ID===id);
+  const clave=normalizarClave(jugada.FECHA,jugada.HORA);
+
+  document.getElementById("fecha").textContent=jugada.FECHA;
+  document.getElementById("hora").textContent=jugada.HORA;
+  document.getElementById("usuario").textContent=jugada.USUARIO;
+  document.getElementById("observaciones").textContent=jugada.OBSERVACIONES||"";
+
+  document.getElementById("fechaImpresion").textContent=
+    "Impreso: "+new Date().toLocaleString();
+
+  JsBarcode("#barcode",id,{displayValue:false});
+
+  const ventasMap=new Map();
+  ventas.forEach(v=>ventasMap.set(v.ID,v.ESTADO));
+
+  const filtrados=detalles.filter(d=>
+    normalizarClave(d.FECHA,d.JUEGA)===clave &&
+    d.ESTADO==="ACTIVO" &&
+    equalsUser(d.USUARIO,jugada.USUARIO) &&
+    (!d.VENTA||ventasMap.get(d.VENTA)==="ACTIVO")
+  ).sort((a,b)=>parseInt(a.NUMERO)-parseInt(b.NUMERO));
+
+  let totalVenta=0;
+  const grid=document.getElementById("detalleGrid");
+
+  filtrados.forEach(d=>{
+    const val=parseFloat(d.VALOR)||0;
+    totalVenta+=val;
+    grid.innerHTML+=`
+      <div class="detalle-card">
+        <div><b>#${d.NUMERO}</b></div>
+        <div>L ${Math.round(val)}</div>
+      </div>`;
+  });
+
+  document.getElementById("totalNumeros").textContent=filtrados.length;
+  document.getElementById("totalVenta").textContent="L "+Math.round(totalVenta);
+
+  document.getElementById("loadingOverlay").style.display="none";
+  document.getElementById("jugadaCarta").style.display="block";
+
+  setTimeout(()=>window.print(),700);
+});
+</script>
+</body>
+</html>
