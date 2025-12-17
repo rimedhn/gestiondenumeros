@@ -6,66 +6,48 @@
 
 <link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
 <style>
 @page{
   size: letter;
-  margin: 0.7in 0.5in 1.3in 0.5in;
+  margin: 0.7in 0.5in;
 }
 
 body{
   font-family: Arial, sans-serif;
   margin:0;
-  background:#fff;
-}
-
-.jugada-carta{
-  width:8in;
-  margin:auto;
-  padding:0;
 }
 
 .header-row{
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
 
 .header-left{
   display:flex;
-  align-items:center;
   gap:15px;
 }
 
 .logo-img{
-  width:100px;
+  width:95px;
 }
 
-.header-business h2{
-  margin:0;
+.subtitulo{
+  font-size:13px;
+  color:#555;
 }
 
-.header-right{
-  text-align:right;
+.fecha-impresion{
+  font-size:11px;
+  color:#666;
 }
 
 .info-table{
   width:100%;
-  border-collapse:collapse;
   font-size:14px;
-  margin-bottom:8px;
-}
-
-.info-table td{
-  padding:4px 8px;
-}
-
-.detalle-title{
-  text-align:center;
-  font-weight:bold;
-  margin:6px 0;
+  margin-bottom:6px;
 }
 
 .detalle-grid{
@@ -81,65 +63,27 @@ body{
   text-align:center;
   break-inside:avoid;
 }
-
-.numero{
-  font-weight:bold;
-  font-size:1.15em;
-  color:#266;
-}
-
-.valor{
-  color:#444;
-}
-
-.footer-print{
-  position:fixed;
-  bottom:0.2in;
-  left:0.5in;
-  right:0.5in;
-  display:flex;
-  justify-content:space-between;
-  font-size:11px;
-  color:#666;
-}
-
-.page-counter::after{
-  content:"Página " counter(page) " de " counter(pages);
-}
-
-@media print{
-  .detalle-card,
-  .detalle-grid,
-  .detalle-title,
-  table{
-    break-inside:avoid;
-    page-break-inside:avoid;
-  }
-}
 </style>
 </head>
 
 <body>
 
-<div class="jugada-carta" id="jugadaCarta">
+<div id="jugadaCarta" style="padding:15px">
 
-  <!-- ENCABEZADO -->
   <div class="header-row">
     <div class="header-left">
       <img class="logo-img" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
-      <div class="header-business">
-        <h2>GESTIÓN DE NÚMEROS</h2>
-        <div>Resumen de Jugada</div>
+      <div>
+        <h2 style="margin:0">GESTIÓN DE NÚMEROS</h2>
+        <div class="subtitulo">Resumen de Jugada</div>
+        <div class="fecha-impresion" id="fechaImpresion"></div>
       </div>
     </div>
-
-    <div class="header-right">
+    <div>
       <svg id="barcode"></svg>
-      <div>ID Jugada: <span id="idjugada"></span></div>
     </div>
   </div>
 
-  <!-- INFO GENERAL -->
   <table class="info-table">
     <tr>
       <td><b>Fecha:</b> <span id="fecha"></span></td>
@@ -153,15 +97,8 @@ body{
     </tr>
   </table>
 
-  <div class="detalle-title">Detalle</div>
+  <h3 style="margin:6px 0">Detalle</h3>
   <div id="detalleGrid" class="detalle-grid"></div>
-
-</div>
-
-<!-- FOOTER IMPRESIÓN -->
-<div class="footer-print">
-  <span id="fechaImpresion"></span>
-  <span class="page-counter"></span>
 </div>
 
 <script>
@@ -170,7 +107,6 @@ const URL_DETALLE="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFT
 const URL_VENTAS="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/VENTAS";
 
 const id=new URLSearchParams(location.search).get("id");
-document.getElementById("idjugada").textContent=id;
 
 function normalizarClave(f,h){
   return (f+" "+h).trim().replace(/\s+/g," ").toUpperCase();
@@ -185,14 +121,15 @@ Promise.all([
   fetch(URL_VENTAS).then(r=>r.json())
 ]).then(([jugadas,detalles,ventas])=>{
 
-  const jugada=jugadas.find(j=>j.ID===id && j.ESTADO==="ACTIVO");
-  if(!jugada) return;
-
+  const jugada=jugadas.find(j=>j.ID===id);
   const clave=normalizarClave(jugada.FECHA,jugada.HORA);
+
   document.getElementById("fecha").textContent=jugada.FECHA;
   document.getElementById("hora").textContent=jugada.HORA;
   document.getElementById("usuario").textContent=jugada.USUARIO;
   document.getElementById("observaciones").textContent=jugada.OBSERVACIONES||"";
+  document.getElementById("fechaImpresion").textContent=
+    "Impreso: "+new Date().toLocaleString();
 
   JsBarcode("#barcode",id,{displayValue:false});
 
@@ -214,17 +151,17 @@ Promise.all([
     totalVenta+=val;
     grid.innerHTML+=`
       <div class="detalle-card">
-        <div class="numero">#${d.NUMERO}</div>
-        <div class="valor">L ${Math.round(val)}</div>
+        <div><b>#${d.NUMERO}</b></div>
+        <div>L ${Math.round(val)}</div>
       </div>`;
   });
 
   document.getElementById("totalNumeros").textContent=filtrados.length;
   document.getElementById("totalVenta").textContent="L "+Math.round(totalVenta);
-  document.getElementById("fechaImpresion").textContent=
-    "Impreso: "+new Date().toLocaleString();
+
+  setTimeout(()=>window.print(),700);
 });
 </script>
-
 </body>
 </html>
+
