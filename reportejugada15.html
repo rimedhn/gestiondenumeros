@@ -141,102 +141,215 @@ const URL_JUGADA="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF
 const URL_DETALLE="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/DETALLE";
 const URL_VENTAS="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/VENTAS";
 
-const id=new URLSearchParams(location.search).get("id");
+const id = new URLSearchParams(location.search).get("id");
 
-function normalizarTexto(valor){
-  return (valor||"").toString().trim().replace(/\s+/g," ").toUpperCase();
+function $(selector){
+  return document.querySelector(selector);
 }
 
-function equalsUser(a,b){
-  return normalizarTexto(a)===normalizarTexto(b);
+function texto(v){
+  return (v ?? "").toString().trim();
+}
+
+function normalizar(v){
+  return texto(v).replace(/\s+/g, " ").toUpperCase();
+}
+
+function numero(v){
+  const n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+}
+
+function obtenerCampo(obj, posiblesCampos){
+  if(!obj || typeof obj !== "object") return "";
+  const claves = Object.keys(obj);
+  for(const nombre of posiblesCampos){
+    const exacta = claves.find(k => k === nombre);
+    if(exacta) return obj[exacta];
+  }
+  for(const nombre of posiblesCampos){
+    const buscada = normalizar(nombre);
+    const encontrada = claves.find(k => normalizar(k) === buscada);
+    if(encontrada) return obj[encontrada];
+  }
+  return "";
+}
+
+function mostrarContenido(){
+  $("#loadingOverlay").style.display="none";
+  $("#jugadaCarta").style.display="block";
 }
 
 function mostrarError(mensaje){
-  document.getElementById("loadingOverlay").style.display="none";
-  document.getElementById("jugadaCarta").style.display="block";
-  document.getElementById("detalleGrid").innerHTML=`<div style="grid-column:1/-1;color:#b00020;font-weight:bold;">${mensaje}</div>`;
-  document.getElementById("fechaImpresion").textContent="Impreso: "+new Date().toLocaleString();
-  document.getElementById("totalNumeros").textContent="0";
-  document.getElementById("totalVenta").textContent="L 0";
-  document.getElementById("observaciones").textContent="";
+  $("#fechaImpresion").textContent = "Impreso: " + new Date().toLocaleString();
+  $("#fecha").textContent = "";
+  $("#hora").textContent = "";
+  $("#usuario").textContent = "";
+  $("#observaciones").textContent = "";
+  $("#totalNumeros").textContent = "0";
+  $("#totalVenta").textContent = "L 0";
+  $("#detalleGrid").innerHTML = `
+    <div style="grid-column:1/-1;color:#b00020;font-weight:bold;text-align:center;padding:20px 10px;">
+      ${mensaje}
+    </div>
+  `;
+  mostrarContenido();
 }
 
-if(!id){
-  mostrarError("No se proporcionó el ID de la jugada en la URL.");
-}else{
-  Promise.all([
-    fetch(URL_JUGADA).then(r=>{
-      if(!r.ok) throw new Error("No se pudo cargar JUGADA");
-      return r.json();
-    }),
-    fetch(URL_DETALLE).then(r=>{
-      if(!r.ok) throw new Error("No se pudo cargar DETALLE");
-      return r.json();
-    }),
-    fetch(URL_VENTAS).then(r=>{
-      if(!r.ok) throw new Error("No se pudo cargar VENTAS");
-      return r.json();
-    })
-  ]).then(([jugadas,detalles,ventas])=>{
+async function cargarJSON(url, nombre){
+  const response = await fetch(url, { cache: "no-store" });
+  if(!response.ok){
+    throw new Error("No se pudo cargar la hoja " + nombre);
+  }
 
-    const jugada=jugadas.find(j=>String(j.ID).trim()===String(id).trim());
+  let data;
+  try{
+    data = await response.json();
+  }catch(e){
+    throw new Error("La hoja " + nombre + " no devolvió un JSON válido");
+  }
 
-    if(!jugada){
-      throw new Error("No se encontró la jugada solicitada.");
-    }
+  if(!Array.isArray(data)){
+    throw new Error("La hoja " + nombre + " no devolvió una lista de registros");
+  }
 
-    const jugadaClave=normalizarTexto(jugada.JUGADA);
+  return data;
+}
 
-    if(!jugadaClave){
-      throw new Error("La jugada seleccionada no tiene valor en la columna JUGADA.");
-    }
-
-    document.getElementById("fecha").textContent=jugada.FECHA||"";
-    document.getElementById("hora").textContent=jugada.HORA||"";
-    document.getElementById("usuario").textContent=jugada.USUARIO||"";
-    document.getElementById("observaciones").textContent=jugada.OBSERVACIONES||"";
-
-    document.getElementById("fechaImpresion").textContent=
-      "Impreso: "+new Date().toLocaleString();
-
-    JsBarcode("#barcode",String(id),{displayValue:false});
-
-    const ventasMap=new Map();
-    ventas.forEach(v=>ventasMap.set(v.ID,v.ESTADO));
-
-    const filtrados=detalles.filter(d=>
-      normalizarTexto(d.JUGADA)===jugadaClave &&
-      d.ESTADO==="ACTIVO" &&
-      equalsUser(d.USUARIO,jugada.USUARIO) &&
-      (!d.VENTA || ventasMap.get(d.VENTA)==="ACTIVO")
-    ).sort((a,b)=>(parseInt(a.NUMERO)||0)-(parseInt(b.NUMERO)||0));
-
-    let totalVenta=0;
-    const grid=document.getElementById("detalleGrid");
-    grid.innerHTML="";
-
-    filtrados.forEach(d=>{
-      const val=parseFloat(d.VALOR)||0;
-      totalVenta+=val;
-      grid.innerHTML+=`
-      <div class="detalle-card">
-        <div><b>#${d.NUMERO||""}</b></div>
-        <div>L ${Math.round(val)}</div>
-      </div>`;
-    });
-
-    document.getElementById("totalNumeros").textContent=filtrados.length;
-    document.getElementById("totalVenta").textContent="L "+Math.round(totalVenta);
-
-    document.getElementById("loadingOverlay").style.display="none";
-    document.getElementById("jugadaCarta").style.display="block";
-
-    setTimeout(()=>window.print(),700);
-  }).catch(error=>{
-    console.error(error);
-    mostrarError(error.message || "Ocurrió un error al generar el reporte.");
+function buscarJugadaPorId(jugadas, idBuscado){
+  return jugadas.find(j => {
+    const valorId = obtenerCampo(j, ["ID", "Id", "id"]);
+    return normalizar(valorId) === normalizar(idBuscado);
   });
 }
+
+function construirMapaVentas(ventas){
+  const mapa = new Map();
+
+  ventas.forEach(v => {
+    const ventaId = obtenerCampo(v, ["ID", "Id", "id"]);
+    const estado = normalizar(obtenerCampo(v, ["ESTADO", "Estado", "estado"]));
+    mapa.set(normalizar(ventaId), estado);
+  });
+
+  return mapa;
+}
+
+function obtenerDetallesRelacionados(detalles, jugada, ventasMap){
+  const jugadaClave = normalizar(obtenerCampo(jugada, ["JUGADA", "Jugada", "jugada"]));
+  const usuarioJugada = normalizar(obtenerCampo(jugada, ["USUARIO", "Usuario", "usuario"]));
+
+  if(!jugadaClave){
+    throw new Error("La fila de JUGADA no contiene valor en la columna JUGADA");
+  }
+
+  return detalles.filter(d => {
+    const detalleJugada = normalizar(obtenerCampo(d, ["JUGADA", "Jugada", "jugada"]));
+    const detalleUsuario = normalizar(obtenerCampo(d, ["USUARIO", "Usuario", "usuario"]));
+    const detalleEstado = normalizar(obtenerCampo(d, ["ESTADO", "Estado", "estado"]));
+    const detalleVenta = normalizar(obtenerCampo(d, ["VENTA", "Venta", "venta"]));
+
+    const ventaActiva = !detalleVenta || ventasMap.get(detalleVenta) === "ACTIVO";
+
+    return (
+      detalleJugada === jugadaClave &&
+      detalleEstado === "ACTIVO" &&
+      detalleUsuario === usuarioJugada &&
+      ventaActiva
+    );
+  }).sort((a, b) => {
+    const na = parseInt(obtenerCampo(a, ["NUMERO", "Numero", "numero"])) || 0;
+    const nb = parseInt(obtenerCampo(b, ["NUMERO", "Numero", "numero"])) || 0;
+    return na - nb;
+  });
+}
+
+function renderizarReporte(jugada, detalles){
+  const fecha = obtenerCampo(jugada, ["FECHA", "Fecha", "fecha"]);
+  const hora = obtenerCampo(jugada, ["HORA", "Hora", "hora"]);
+  const usuario = obtenerCampo(jugada, ["USUARIO", "Usuario", "usuario"]);
+  const observaciones = obtenerCampo(jugada, ["OBSERVACIONES", "Observaciones", "observaciones"]);
+  const codigo = texto(obtenerCampo(jugada, ["ID", "Id", "id"])) || texto(id);
+
+  $("#fecha").textContent = fecha || "";
+  $("#hora").textContent = hora || "";
+  $("#usuario").textContent = usuario || "";
+  $("#observaciones").textContent = observaciones || "";
+  $("#fechaImpresion").textContent = "Impreso: " + new Date().toLocaleString();
+
+  try{
+    JsBarcode("#barcode", codigo, { displayValue:false });
+  }catch(e){
+    console.error("Error generando código de barras:", e);
+  }
+
+  let totalVenta = 0;
+  const grid = $("#detalleGrid");
+  grid.innerHTML = "";
+
+  detalles.forEach(d => {
+    const numeroValor = obtenerCampo(d, ["NUMERO", "Numero", "numero"]);
+    const valor = numero(obtenerCampo(d, ["VALOR", "Valor", "valor"]));
+    totalVenta += valor;
+
+    grid.innerHTML += `
+      <div class="detalle-card">
+        <div><b>#${texto(numeroValor)}</b></div>
+        <div>L ${Math.round(valor)}</div>
+      </div>`;
+  });
+
+  if(detalles.length === 0){
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;color:#666;padding:20px 10px;">
+        No se encontraron detalles para esta jugada.
+      </div>
+    `;
+  }
+
+  $("#totalNumeros").textContent = String(detalles.length);
+  $("#totalVenta").textContent = "L " + Math.round(totalVenta);
+
+  mostrarContenido();
+
+  setTimeout(() => {
+    try{
+      window.print();
+    }catch(e){
+      console.error("Error al imprimir:", e);
+    }
+  }, 700);
+}
+
+async function iniciar(){
+  try{
+    if(!texto(id)){
+      throw new Error("No se proporcionó el ID de la jugada en la URL");
+    }
+
+    const [jugadas, detalles, ventas] = await Promise.all([
+      cargarJSON(URL_JUGADA, "JUGADA"),
+      cargarJSON(URL_DETALLE, "DETALLE"),
+      cargarJSON(URL_VENTAS, "VENTAS")
+    ]);
+
+    const jugada = buscarJugadaPorId(jugadas, id);
+
+    if(!jugada){
+      throw new Error("No se encontró la jugada con ID " + id);
+    }
+
+    const ventasMap = construirMapaVentas(ventas);
+    const detallesRelacionados = obtenerDetallesRelacionados(detalles, jugada, ventasMap);
+
+    renderizarReporte(jugada, detallesRelacionados);
+  }catch(error){
+    console.error("Error generando reporte:", error);
+    mostrarError(error.message || "Ocurrió un error al generar el reporte");
+  }
+}
+
+iniciar();
 </script>
 </body>
 </html>
