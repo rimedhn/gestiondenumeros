@@ -143,12 +143,12 @@ const URL_VENTAS="https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF
 
 const id=new URLSearchParams(location.search).get("id");
 
-function normalizarClave(f,h){
-  return ((f||"")+" "+(h||"")).trim().replace(/\s+/g," ").toUpperCase();
+function normalizarTexto(valor){
+  return (valor||"").toString().trim().replace(/\s+/g," ").toUpperCase();
 }
 
 function equalsUser(a,b){
-  return (a||"").trim().toUpperCase()===(b||"").trim().toUpperCase();
+  return normalizarTexto(a)===normalizarTexto(b);
 }
 
 function mostrarError(mensaje){
@@ -185,7 +185,11 @@ if(!id){
       throw new Error("No se encontró la jugada solicitada.");
     }
 
-    const clave=normalizarClave(jugada.FECHA,jugada.HORA);
+    const jugadaClave=normalizarTexto(jugada.JUGADA);
+
+    if(!jugadaClave){
+      throw new Error("La jugada seleccionada no tiene valor en la columna JUGADA.");
+    }
 
     document.getElementById("fecha").textContent=jugada.FECHA||"";
     document.getElementById("hora").textContent=jugada.HORA||"";
@@ -201,7 +205,7 @@ if(!id){
     ventas.forEach(v=>ventasMap.set(v.ID,v.ESTADO));
 
     const filtrados=detalles.filter(d=>
-      normalizarClave(d.FECHA,d.JUEGA)===clave &&
+      normalizarTexto(d.JUGADA)===jugadaClave &&
       d.ESTADO==="ACTIVO" &&
       equalsUser(d.USUARIO,jugada.USUARIO) &&
       (!d.VENTA || ventasMap.get(d.VENTA)==="ACTIVO")
