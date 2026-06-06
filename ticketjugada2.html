@@ -144,7 +144,7 @@
       </div>
 
       <div align="center">--------------------------------------------------------</div>
-      <div   align="center"><b>REFERENCIA: <span id="referencia"></span></b></div>
+      <div align="center"><b>REFERENCIA: <span id="referencia"></span></b></div>
       <div align="center">--------------------------------------------------------</div>
 
       <table>
@@ -164,7 +164,7 @@
           <td class="informasi" style="width: 30%;">NUMEROS:</td>
           <td class="informasi" style="width: 70%;" id="numeros"></td>
         </tr>
-          <tr>
+        <tr>
           <td class="informasi" style="width: 30%;">TOTAL L:</td>
           <td class="informasi" style="width: 70%;" id="total"></td>
         </tr>
@@ -181,7 +181,7 @@
           </td>
           <td>
             <h2>MONTO</h2>
-          </td>          
+          </td>
         </tr>
       </table>
       <div align="center">--------------------------------------------------------</div>
@@ -191,7 +191,7 @@
       </table>
 
       <div align="center">--------------------------------------------------------</div>
-      <div   align="center"><b>OBSERVACIONES: <span id="observaciones"></span></b></div>
+      <div align="center"><b>OBSERVACIONES: <span id="observaciones"></span></b></div>
       <div align="center">--------------------------------------------------------</div>
     </div>
 
@@ -211,6 +211,14 @@
         document.getElementById(id).textContent = value;
       }
 
+      // Convierte a número para ordenar correctamente
+      function toNumber(value) {
+        if (value === undefined || value === null) return 0;
+        var cleaned = String(value).trim().replace(/[^\d.-]/g, "");
+        var parsed = parseFloat(cleaned);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+
       // Populate the receipt with data from URL parameters
       setTextContent("referencia", getUrlParameter("referencia"));
       setTextContent("fecha", getUrlParameter("fecha"));
@@ -219,44 +227,51 @@
       setTextContent("total", getUrlParameter("total"));
       setTextContent("jugada", getUrlParameter("jugada"));
       setTextContent("observaciones", getUrlParameter("observaciones"));
-      
-      // Populate product table
-      var descriptions = getUrlParameter("descriptions").split(",");
-      var quantitys = getUrlParameter("quantitys").split(",");
-      var amounts = getUrlParameter("amounts").split(",");
 
-      // Combinar los datos para ordenarlos por número de menor a mayor
+      // Populate product table
+      var descriptions = getUrlParameter("descriptions")
+        ? getUrlParameter("descriptions").split(",")
+        : [];
+      var quantitys = getUrlParameter("quantitys")
+        ? getUrlParameter("quantitys").split(",")
+        : [];
+      var amounts = getUrlParameter("amounts")
+        ? getUrlParameter("amounts").split(",")
+        : [];
+
+      // Unir filas para mantener la relación entre número y monto
       var items = [];
-      for (var i = 0; i < descriptions.length; i++) {
+      var maxLength = Math.max(descriptions.length, quantitys.length, amounts.length);
+
+      for (var i = 0; i < maxLength; i++) {
         items.push({
-          description: descriptions[i],
-          quantity: quantitys[i],
-          amount: amounts[i]
+          description: descriptions[i] || "",
+          quantity: quantitys[i] || "",
+          amount: amounts[i] || ""
         });
       }
 
+      // Ordenar de menor a mayor usando la columna NUMERO como criterio
       items.sort(function (a, b) {
-        return parseFloat(a.description) - parseFloat(b.description);
+        return toNumber(a.quantity) - toNumber(b.quantity);
       });
 
       var productTable = document.getElementById("productTable");
+
       for (var i = 0; i < items.length; i++) {
-        // Create a new row for the description
         var descriptionRow = productTable.insertRow();
         descriptionRow.innerHTML = `
         <td colspan="3" class="descriptions">${items[i].description}</td>
     `;
 
-        // Create a new row for the other details
         var detailsRow = productTable.insertRow();
         detailsRow.innerHTML = `
         <td class="qty">${items[i].quantity}</td>
         <td class="Amount">L${items[i].amount}</td>
     `;
 
-        // Add a class to the details row for styling
         detailsRow.className = "listitem";
-      }      
+      }
 
       // Trigger print when the page loads
       window.onload = function () {
