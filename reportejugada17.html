@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Resumen de Jugada</title>
+
+<link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+<style>
+@page{
+  size: letter;
+  margin: 0.7in 0.5in;
+}
+
+body{
+  font-family: Arial, sans-serif;
+  margin:0;
+}
+
+/* ===== SELECTOR INICIAL ===== */
+#selectorOverlay{
+  position:fixed;
+  inset:0;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:10000;
+  padding:20px;
+  box-sizing:border-box;
+}
+
+.selector-title{
+  font-size:22px;
+  font-weight:bold;
+  color:#223;
+  margin-bottom:10px;
+  text-align:center;
+}
+
+.selector-subtitle{
+  font-size:14px;
+  color:#555;
+  margin-bottom:24px;
+  text-align:center;
+  max-width:520px;
+}
+
+.selector-buttons{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.selector-btn{
+  min-width:180px;
+  padding:14px 22px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+  box-shadow:0 4px 14px rgba(0,0,0,.12);
+}
+
+.selector-btn:hover{
+  transform:translateY(-1px);
+}
+
+.selector-btn:active{
+  transform:translateY(0);
+}
+
+.btn-pdf{
+  background:#2a5bd7;
+  color:#fff;
+}
+
+.btn-excel{
+  background:#1f8b4c;
+  color:#fff;
+}
+
+/* ===== LOADING ===== */
+#loadingOverlay{
+  position:fixed;
+  inset:0;
+  background:#fff;
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  padding:20px;
+  box-sizing:border-box;
+}
+
+.loading-text{
+  font-size:18px;
+  font-weight:bold;
+  color:#226;
+  letter-spacing:1px;
+  text-align:center;
+  margin-bottom:14px;
+}
+
+.loading-subtext{
+  font-size:13px;
+  color:#555;
+  margin-top:10px;
+  text-align:center;
+}
+
+.progress-wrap{
+  width:min(420px, 90vw);
+}
+ 
+.progress-bar{
+  width:100%;
+  height:16px;
+  background:#e8ebf3;
+  border-radius:999px;
+  overflow:hidden;
+  box-shadow:inset 0 0 0 1px #d6dbea;
+}
+
+.progress-fill{
+  width:0%;
+  height:100%;
+  background:linear-gradient(90deg,#2a5bd7,#5f8cff);
+  border-radius:999px;
+  transition:width .35s ease;
+}
+
+.progress-percent{
+  margin-top:8px;
+  font-size:13px;
+  color:#223;
+  text-align:right;
+  font-weight:bold;
+}
+
+/* ===== CONTENT ===== */
+.header-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:8px;
+}
+
+.logo-img{
+  width:95px;
+}
+
+.subtitulo{
+  font-size:13px;
+  color:#555;
+}
+
+.fecha-impresion{
+  font-size:11px;
+  color:#666;
+}
+
+.info-table{
+  width:100%;
+  font-size:14px;
+  margin-bottom:6px;
+}
+
+.detalle-grid{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:12px;
+}
+
+.detalle-card{
+  border:1px solid #ddd;
+  padding:8px;
+  border-radius:6px;
+  text-align:center;
+  break-inside:avoid;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SELECTOR INICIAL -->
+<div id="selectorOverlay">
+  <div class="selector-title">Selecciona el formato de salida</div>
+  <div class="selector-subtitle">
+    Elige si deseas generar el reporte en PDF o descargar/compartir los datos en formato Excel.
+  </div>
+  <div class="selector-buttons">
+    <button id="btnPDF" class="selector-btn btn-pdf">PDF</button>
+    <button id="btnEXCEL" class="selector-btn btn-excel">EXCEL</button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loadingOverlay">
+  <div class="loading-text">CARGANDO DATOS, ESPERA UN MOMENTO</div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar">
+      <div id="progressFill" class="progress-fill"></div>
+    </div>
+    <div id="progressPercent" class="progress-percent">0%</div>
+  </div>
+
+  <div id="loadingSubtext" class="loading-subtext">Iniciando carga...</div>
+</div>
+
+<div id="jugadaCarta" style="padding:15px;display:none">
+
+  <div class="header-row">
+    <div style="display:flex;gap:15px">
+      <img class="logo-img" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
+      <div>
+        <h2 style="margin:0">GESTIÓN DE NÚMEROS</h2>
+        <div class="subtitulo">Resumen de Jugada</div>
+        <div class="fecha-impresion" id="fechaImpresion"></div>
+      </div>
+    </div>
+    <div>
+      <svg id="barcode"></svg>
+    </div>
+  </div>
+
+  <table class="info-table">
+    <tr>
+      <td><b>Fecha:</b> <span id="fecha"></span></td>
+      <td><b>Hora:</b> <span id="hora"></span></td>
+      <td><b>Usuario:</b> <span id="usuario"></span></td>
+    </tr>
+    <tr>
+      <td><b>Total Números:</b> <span id="totalNumeros"></span></td>
+      <td><b>Total Venta:</b> <span id="totalVenta"></span></td>
+      <td><b>Observaciones:</b> <span id="observaciones"></span></td>
+    </tr>
+  </table>
+
+  <h3 style="margin:6px 0">Detalle</h3>
+  <div id="detalleGrid" class="detalle-grid"></div>
+
+</div>
+
+<script>
+const URL_JUGADA = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/JUGADA";
+const URL_DETALLE = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/DETALLE";
+
+const id = new URLSearchParams(location.search).get("id");
+
+function $(selector){
+  return document.querySelector(selector);
+}
+
+function texto(v){
+  return (v ?? "").toString().trim();
+}
+
+function normalizar(v){
+  return texto(v).replace(/\s+/g, " ").toUpperCase();
+}
+
+function numero(v){
+  const limpio = texto(v).replace(/,/g, "");
+  const n = parseFloat(limpio);
+  return isNaN(n) ? 0 : n;
+}
+
+function actualizarProgreso(valor, mensaje){
+  const seguro = Math.max(0, Math.min(100, valor));
+  $("#progressFill").style.width = seguro + "%";
+  $("#progressPercent").textContent = seguro + "%";
+  $("#loadingSubtext").textContent = mensaje || "";
+}
+
+function obtenerCampo(obj, posiblesCampos){
+  if(!obj || typeof obj !== "object") return "";
+  const claves = Object.keys(obj);
+
+  for(const nombre of posiblesCampos){
+    const exacta = claves.find(k => k === nombre);
+    if(exacta) return obj[exacta];
+  }
+
+  for(const nombre of posiblesCampos){
+    const buscada = normalizar(nombre);
+    const encontrada = claves.find(k => normalizar(k) === buscada);
+    if(encontrada) return obj[encontrada];
+  }
+
+  return "";
+}
+
+function mostrarLoading(){
+  $("#selectorOverlay").style.display = "none";
+  $("#loadingOverlay").style.display = "flex";
+}
+
+function mostrarContenido(){
+  $("#loadingOverlay").style.display = "none";
+  $("#selectorOverlay").style.display = "none";
+  $("#jugadaCarta").style.display = "block";
+}
+
+function mostrarError(mensaje){
+  $("#selectorOverlay").style.display = "none";
+  $("#fechaImpresion").textContent = "Impreso: " + new Date().toLocaleString();
+  $("#fecha").textContent = "";
+  $("#hora").textContent = "";
+  $("#usuario").textContent = "";
+  $("#observaciones").textContent = "";
+  $("#totalNumeros").textContent = "0";
+  $("#totalVenta").textContent = "L 0";
+  $("#detalleGrid").innerHTML = `
+    <div style="grid-column:1/-1;color:#b00020;font-weight:bold;text-align:center;padding:20px 10px;">
+      ${mensaje}
+    </div>
+  `;
+  mostrarContenido();
+}
+
+async function cargarJSON(url, nombre, progresoCompletado, mensajeCompletado){
+  const response = await fetch(url, { cache: "no-store" });
+  if(!response.ok){
+    throw new Error("No se pudo cargar la hoja " + nombre);
+  }
+
+  let data;
+  try{
+    data = await response.json();
+  }catch(e){
+    throw new Error("La hoja " + nombre + " no devolvió un JSON válido");
+  }
+
+  if(!Array.isArray(data)){
+    throw new Error("La hoja " + nombre + " no devolvió una lista de registros");
+  }
+
+  actualizarProgreso(progresoCompletado, mensajeCompletado);
+  return data;
+}
+
+function buscarJugadaPorId(jugadas, idBuscado){
+  return jugadas.find(j => {
+    const valorId = obtenerCampo(j, ["ID", "Id", "id"]);
+    return normalizar(valorId) === normalizar(idBuscado);
+  });
+}
+
+function obtenerDetallesRelacionados(detalles, jugada){
+  const jugadaClave = normalizar(obtenerCampo(jugada, ["JUGADA", "Jugada", "jugada"]));
+  const usuarioJugada = normalizar(obtenerCampo(jugada, ["USUARIO", "Usuario", "usuario"]));
+
+  if(!jugadaClave){
+    throw new Error("La fila de JUGADA no contiene valor en la columna JUGADA");
+  }
+
+  return detalles.filter(d => {
+    const detalleJugada = normalizar(obtenerCampo(d, ["JUGADA", "Jugada", "jugada"]));
+    const detalleUsuario = normalizar(obtenerCampo(d, ["USUARIO", "Usuario", "usuario"]));
+    const detalleEstado = normalizar(obtenerCampo(d, ["ESTADO", "Estado", "estado"]));
+
+    return (
+      detalleJugada === jugadaClave &&
+      detalleEstado === "ACTIVO" &&
+      detalleUsuario === usuarioJugada
+    );
+  }).sort((a, b) => {
+    const na = parseInt(obtenerCampo(a, ["NUMERO", "Numero", "numero"])) || 0;
+    const nb = parseInt(obtenerCampo(b, ["NUMERO", "Numero", "numero"])) || 0;
+    return na - nb;
+  });
+}
+
+function renderizarReporte(jugada, detalles){
+  const fecha = obtenerCampo(jugada, ["FECHA", "Fecha", "fecha"]);
+  const hora = obtenerCampo(jugada, ["HORA", "Hora", "hora"]);
+  const usuario = obtenerCampo(jugada, ["USUARIO", "Usuario", "usuario"]);
+  const observaciones = obtenerCampo(jugada, ["OBSERVACIONES", "Observaciones", "observaciones"]);
+  const codigo = texto(obtenerCampo(jugada, ["ID", "Id", "id"])) || texto(id);
+
+  $("#fecha").textContent = fecha || "";
+  $("#hora").textContent = hora || "";
+  $("#usuario").textContent = usuario || "";
+  $("#observaciones").textContent = observaciones || "";
+  $("#fechaImpresion").textContent = "Impreso: " + new Date().toLocaleString();
+
+  try{
+    JsBarcode("#barcode", codigo, { displayValue:false });
+  }catch(e){
+    console.error("Error generando código de barras:", e);
+  }
+
+  const grid = $("#detalleGrid");
+  grid.innerHTML = "";
+
+  let totalVenta = 0;
+  const fragment = document.createDocumentFragment();
+
+  detalles.forEach(d => {
+    const numeroValor = obtenerCampo(d, ["NUMERO", "Numero", "numero"]);
+    const valor = numero(obtenerCampo(d, ["VALOR", "Valor", "valor"]));
+    totalVenta += valor;
+
+    const card = document.createElement("div");
+    card.className = "detalle-card";
+    card.innerHTML = `
+      <div><b>#${texto(numeroValor)}</b></div>
+      <div>L ${Math.round(valor)}</div>
+    `;
+    fragment.appendChild(card);
+  });
+
+  if(detalles.length === 0){
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;color:#666;padding:20px 10px;">
+        No se encontraron detalles para esta jugada.
+      </div>
+    `;
+  }else{
+    grid.appendChild(fragment);
+  }
+
+  $("#totalNumeros").textContent = String(detalles.length);
+  $("#totalVenta").textContent = "L " + Math.round(totalVenta);
+}
+
+function escaparCSV(valor){
+  const textoValor = texto(valor).replace(/"/g, '""');
+  return `"${textoValor}"`;
+}
+
+function construirCSV(jugada, detalles){
+  const fecha = obtenerCampo(jugada, ["FECHA", "Fecha", "fecha"]);
+  const hora = obtenerCampo(jugada, ["HORA", "Hora", "hora"]);
+  const usuario = obtenerCampo(jugada, ["USUARIO", "Usuario", "usuario"]);
+  const observaciones = obtenerCampo(jugada, ["OBSERVACIONES", "Observaciones", "observaciones"]);
+  const codigo = texto(obtenerCampo(jugada, ["ID", "Id", "id"])) || texto(id);
+
+  let totalVenta = 0;
+  detalles.forEach(d => {
+    totalVenta += numero(obtenerCampo(d, ["VALOR", "Valor", "valor"]));
+  });
+
+  const filas = [];
+
+  filas.push(["Resumen de Jugada"]);
+  filas.push(["ID", codigo]);
+  filas.push(["Fecha", fecha]);
+  filas.push(["Hora", hora]);
+  filas.push(["Usuario", usuario]);
+  filas.push(["Observaciones", observaciones]);
+  filas.push(["Total Números", detalles.length]);
+  filas.push(["Total Venta", Math.round(totalVenta)]);
+  filas.push([]);
+  filas.push(["Detalle"]);
+  filas.push(["Número", "Valor"]);
+
+  detalles.forEach(d => {
+    filas.push([
+      texto(obtenerCampo(d, ["NUMERO", "Numero", "numero"])),
+      Math.round(numero(obtenerCampo(d, ["VALOR", "Valor", "valor"])))
+    ]);
+  });
+
+  return filas.map(fila => fila.map(escaparCSV).join(",")).join("\n");
+}
+
+function descargarExcel(jugada, detalles){
+  const csv = construirCSV(jugada, detalles);
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const codigo = texto(obtenerCampo(jugada, ["ID", "Id", "id"])) || texto(id) || "jugada";
+  const enlace = document.createElement("a");
+  enlace.href = url;
+  enlace.download = "reporte_jugada_" + codigo + ".csv";
+  document.body.appendChild(enlace);
+  enlace.click();
+  enlace.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function cargarDatosBase(){
+  actualizarProgreso(10, "Validando parámetros...");
+
+  if(!texto(id)){
+    throw new Error("No se proporcionó el ID de la jugada en la URL");
+  }
+
+  actualizarProgreso(15, "Consultando hojas de cálculo...");
+
+  const promesaJugadas = cargarJSON(URL_JUGADA, "JUGADA", 45, "Hoja JUGADA cargada");
+  const promesaDetalles = cargarJSON(URL_DETALLE, "DETALLE", 75, "Hoja DETALLE cargada");
+
+  const [jugadas, detalles] = await Promise.all([
+    promesaJugadas,
+    promesaDetalles
+  ]);
+
+  actualizarProgreso(85, "Procesando información de la jugada...");
+
+  const jugada = buscarJugadaPorId(jugadas, id);
+
+  if(!jugada){
+    throw new Error("No se encontró la jugada con ID " + id);
+  }
+
+  const detallesRelacionados = obtenerDetallesRelacionados(detalles, jugada);
+
+  return { jugada, detallesRelacionados };
+}
+
+async function iniciarPDF(){
+  try{
+    mostrarLoading();
+
+    const { jugada, detallesRelacionados } = await cargarDatosBase();
+
+    actualizarProgreso(95, "Renderizando reporte...");
+
+    renderizarReporte(jugada, detallesRelacionados);
+
+    actualizarProgreso(100, "Reporte generado correctamente");
+
+    setTimeout(() => {
+      mostrarContenido();
+      setTimeout(() => {
+        try{
+          window.print();
+        }catch(e){
+          console.error("Error al imprimir:", e);
+        }
+      }, 500);
+    }, 250);
+
+  }catch(error){
+    console.error("Error generando reporte:", error);
+    mostrarError(error.message || "Ocurrió un error al generar el reporte");
+  }
+}
+
+async function iniciarExcel(){
+  try{
+    mostrarLoading();
+
+    const { jugada, detallesRelacionados } = await cargarDatosBase();
+
+    actualizarProgreso(95, "Preparando archivo Excel...");
+
+    descargarExcel(jugada, detallesRelacionados);
+
+    actualizarProgreso(100, "Archivo generado correctamente");
+
+    setTimeout(() => {
+      renderizarReporte(jugada, detallesRelacionados);
+      mostrarContenido();
+    }, 250);
+
+  }catch(error){
+    console.error("Error generando archivo Excel:", error);
+    mostrarError(error.message || "Ocurrió un error al generar el archivo Excel");
+  }
+}
+
+$("#btnPDF").addEventListener("click", iniciarPDF);
+$("#btnEXCEL").addEventListener("click", iniciarExcel);
+</script>
+</body>
+</html>
