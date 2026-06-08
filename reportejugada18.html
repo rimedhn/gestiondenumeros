@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resumen de Jugada</title>
+
+<link rel="icon" href="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true">
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+@page{
+  size: letter;
+  margin: 0.7in 0.5in;
+}
+
+body{
+  font-family: Arial, sans-serif;
+  margin:0;
+  background:#fff;
+}
+
+/* ===== SELECTOR INICIAL ===== */
+#selectorOverlay{
+  position:fixed;
+  inset:0;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:10000;
+  padding:20px;
+  box-sizing:border-box;
+}
+
+.selector-logo{
+  width:88px;
+  max-width:30vw;
+  margin-bottom:14px;
+}
+
+.selector-title{
+  font-size:22px;
+  font-weight:bold;
+  color:#223;
+  margin-bottom:10px;
+  text-align:center;
+}
+
+.selector-subtitle{
+  font-size:14px;
+  color:#555;
+  margin-bottom:24px;
+  text-align:center;
+  max-width:520px;
+  line-height:1.45;
+}
+
+.selector-buttons{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  justify-content:center;
+  width:100%;
+  max-width:520px;
+}
+
+.selector-btn{
+  min-width:180px;
+  padding:14px 22px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease, background .15s ease;
+  box-shadow:0 4px 14px rgba(0,0,0,.12);
+  -webkit-tap-highlight-color:transparent;
+}
+
+.selector-btn:hover{
+  transform:translateY(-1px);
+}
+
+.selector-btn:active{
+  transform:translateY(0);
+}
+
+.selector-btn:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
+
+.btn-pdf{
+  background:#2a5bd7;
+  color:#fff;
+}
+
+.btn-excel{
+  background:#1f8b4c;
+  color:#fff;
+}
+
+/* ===== LOADING ===== */
+#loadingOverlay{
+  position:fixed;
+  inset:0;
+  background:#fff;
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  padding:20px;
+  box-sizing:border-box;
+}
+
+.loading-text{
+  font-size:18px;
+  font-weight:bold;
+  color:#226;
+  letter-spacing:1px;
+  text-align:center;
+  margin-bottom:14px;
+}
+
+.loading-subtext{
+  font-size:13px;
+  color:#555;
+  margin-top:10px;
+  text-align:center;
+}
+
+.progress-wrap{
+  width:min(420px, 90vw);
+}
+ 
+.progress-bar{
+  width:100%;
+  height:16px;
+  background:#e8ebf3;
+  border-radius:999px;
+  overflow:hidden;
+  box-shadow:inset 0 0 0 1px #d6dbea;
+}
+
+.progress-fill{
+  width:0%;
+  height:100%;
+  background:linear-gradient(90deg,#2a5bd7,#5f8cff);
+  border-radius:999px;
+  transition:width .35s ease;
+}
+
+.progress-percent{
+  margin-top:8px;
+  font-size:13px;
+  color:#223;
+  text-align:right;
+  font-weight:bold;
+}
+
+/* ===== CONTENT ===== */
+.header-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:8px;
+  gap:12px;
+}
+
+.logo-img{
+  width:95px;
+}
+
+.subtitulo{
+  font-size:13px;
+  color:#555;
+}
+
+.fecha-impresion{
+  font-size:11px;
+  color:#666;
+}
+
+.info-table{
+  width:100%;
+  font-size:14px;
+  margin-bottom:6px;
+}
+
+.info-table td{
+  vertical-align:top;
+  padding:4px 8px 4px 0;
+}
+
+.detalle-grid{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:12px;
+}
+
+.detalle-card{
+  border:1px solid #ddd;
+  padding:8px;
+  border-radius:6px;
+  text-align:center;
+  break-inside:avoid;
+}
+
+.acciones-post{
+  display:none;
+  margin:12px 0 0;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.accion-btn{
+  border:none;
+  border-radius:8px;
+  padding:10px 14px;
+  font-weight:bold;
+  cursor:pointer;
+  color:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,.12);
+}
+
+.accion-imprimir{
+  background:#2a5bd7;
+}
+
+.accion-excel{
+  background:#1f8b4c;
+}
+
+.accion-compartir{
+  background:#6b46c1;
+}
+
+@media (max-width: 900px){
+  .detalle-grid{
+    grid-template-columns:repeat(4,1fr);
+  }
+}
+
+@media (max-width: 640px){
+  .header-row{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .logo-img{
+    width:78px;
+  }
+
+  .info-table,
+  .info-table tbody,
+  .info-table tr{
+    display:block;
+    width:100%;
+  }
+
+  .info-table td{
+    display:block;
+    width:100%;
+    padding:5px 0;
+  }
+
+  .detalle-grid{
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+  }
+
+  .selector-buttons{
+    flex-direction:column;
+  }
+
+  .selector-btn{
+    width:100%;
+    min-width:0;
+  }
+
+  .acciones-post{
+    display:flex;
+  }
+}
+
+@media print{
+  #selectorOverlay,
+  #loadingOverlay,
+  #accionesPost{
+    display:none !important;
+  }
+
+  body{
+    background:#fff;
+  }
+
+  #jugadaCarta{
+    display:block !important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- SELECTOR INICIAL -->
+<div id="selectorOverlay">
+  <img class="selector-logo" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Logo">
+  <div class="selector-title">Selecciona el formato de salida</div>
+  <div class="selector-subtitle">
+    Elige si deseas generar el reporte en PDF o descargar y compartir los datos en formato Excel.
+  </div>
+  <div class="selector-buttons">
+    <button id="btnPDF" class="selector-btn btn-pdf" type="button">PDF</button>
+    <button id="btnEXCEL" class="selector-btn btn-excel" type="button">EXCEL</button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loadingOverlay">
+  <div class="loading-text">CARGANDO DATOS, ESPERA UN MOMENTO</div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar">
+      <div id="progressFill" class="progress-fill"></div>
+    </div>
+    <div id="progressPercent" class="progress-percent">0%</div>
+  </div>
+
+  <div id="loadingSubtext" class="loading-subtext">Iniciando carga...</div>
+</div>
+
+<div id="jugadaCarta" style="padding:15px;display:none">
+
+  <div class="header-row">
+    <div style="display:flex;gap:15px">
+      <img class="logo-img" src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Logo">
+      <div>
+        <h2 style="margin:0">GESTIÓN DE NÚMEROS</h2>
+        <div class="subtitulo">Resumen de Jugada</div>
+        <div class="fecha-impresion" id="fechaImpresion"></div>
+      </div>
+    </div>
+    <div>
+      <svg id="barcode"></svg>
+    </div>
+  </div>
+
+  <table class="info-table">
+    <tr>
+      <td><b>Fecha:</b> <span id="fecha"></span></td>
+      <td><b>Hora:</b> <span id="hora"></span></td>
+      <td><b>Usuario:</b> <span id="usuario"></span></td>
+    </tr>
+    <tr>
+      <td><b>Total Números:</b> <span id="totalNumeros"></span></td>
+      <td><b>Total Venta:</b> <span id="totalVenta"></span></td>
+      <td><b>Observaciones:</b> <span id="observaciones"></span></td>
+    </tr>
+  </table>
+
+  <div id="accionesPost" class="acciones-post">
+    <button type="button" class="accion-btn accion-imprimir" id="btnImprimir">Imprimir / PDF</button>
+    <button type="button" class="accion-btn accion-excel" id="btnDescargarExcel">Descargar Excel</button>
+    <button type="button" class="accion-btn accion-compartir" id="btnCompartirExcel">Compartir Excel</button>
+  </div>
+
+  <h3 style="margin:6px 0">Detalle</h3>
+  <div id="detalleGrid" class="detalle-grid"></div>
+
+</div>
+
+<script>
+const URL_JUGADA = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/JUGADA";
+const URL_DETALLE = "https://opensheet.elk.sh/1ZcHPnYe03lLPNb07yTmxCf75ShifXVWbuFTF6kN_vH4/DETALLE";
+
+const id = new URLSearchParams(location.search).get("id");
+
+let cacheJugada = null;
+let cacheDetallesRelacionados = [];
+let ultimoNombreArchivo = "";
+
+function $(selector){
+  return document.querySelector(selector);
+}
+
+function texto(v){
+  return (v ?? "").toString().trim();
+}
+
+function normalizar(v){
+  return texto(v).replace(/\s+/g, " ").toUpperCase();
+}
+
+function numero(v){
+  const limpio = texto(v).replace(/,/g, "");
+  const n = parseFloat(limpio);
+  return isNaN(n) ? 0 : n;
+}
+
+function actualizarProgreso(valor, mensaje){
+  const seguro = Math.max(0, Math.min(100, valor));
+  $("#progressFill").style.width = seguro + "%";
+  $("#progressPercent").textContent = seguro + "%";
+  $("#loadingSubtext").textContent = mensaje || "";
+}
+
+function obtenerCampo(obj, posiblesCampos){
+  if(!obj || typeof obj !== "object") return "";
+  const claves = Object.keys(obj);
+
+  for(const nombre of posiblesCampos){
+    const exacta = claves.find(k => k === nombre);
+    if(exacta) return obj[exacta];
+  }
+
+  for(const nombre of posiblesCampos){
+    const buscada = normalizar(nombre);
+    const encontrada = claves.find(k => normalizar(k) === buscada);
+    if(encontrada) return obj[encontrada];
+  }
+
+  return "";
+}
+
+function mostrarLoading(){
+  $("#selectorOverlay").style.display = "none";
+  $("#jugadaCarta").style.display = "none";
+  $("#loadingOverlay").style.display = "flex";
+}
+
+function mostrarContenido(){
+  $("#loadingOverlay").style.display = "none";
+  $("#selectorOverlay").style.display = "none";
+  $("#jugadaCarta").style.display = "block";
+}
+
+function mostrarError(mensaje){
+  $("#selectorOverlay").style.display = "none";
+  $("#fechaImpresion").textContent = "Impreso: " + new Date().toLocaleString();
+  $("#fecha").textContent = "";
+  $("#hora").textContent = "";
+  $("#usuario").textContent = "";
+  $("#observaciones").textContent = "";
+  $("#totalNumeros").textContent = "0";
+  $("#totalVenta").textContent = "L 0";
+  $("#detalleGrid").innerHTML = `
+    <div style="grid-column:1/-1;color:#b00020;font-weight:bold;text-align:center;padding:20px 10px;">
+      ${mensaje}
+    </div>
+  `;
+  mostrarContenido();
+}
+
+function fijarEstadoBotones(deshabilitado){
+  const botones = ["#btnPDF", "#btnEXCEL", "#btnImprimir", "#btnDescargarExcel", "#btnCompartirExcel"];
+  botones.forEach(sel => {
+    const el = $(sel);
+    if(el) el.disabled = deshabilitado;
+  });
+}
+
+async function cargarJSON(url, nombre, progresoCompletado, mensajeCompletado){
+  const response = await fetch(url, { cache: "no-store" });
+  if(!response.ok){
+    throw new Error("No se pudo cargar la hoja " + nombre);
+  }
+
+  let data;
+  try{
+    data = await response.json();
+  }catch(e){
+    throw new Error("La hoja " + nombre + " no devolvió un JSON válido");
+  }
+
+  if(!Array.isArray(data)){
+    throw new Error("La hoja " + nombre + " no devolvió una lista de registros");
+  }
+
+  actualizarProgreso(progresoCompletado, mensajeCompletado);
+  return data;
+}
+
+function buscarJugadaPorId(jugadas, idBuscado){
+  return jugadas.find(j => {
+    const valorId = obtenerCampo(j, ["ID", "Id", "id"]);
+    return normalizar(valorId) === normalizar(idBuscado);
+  });
+}
+
+function obtenerDetallesRelacionados(detalles, jugada){
+  const jugadaClave = normalizar(obtenerCampo(jugada, ["JUGADA", "Jugada", "jugada"]));
+  const usuarioJugada = normalizar(obtenerCampo(jugada, ["USUARIO", "Usuario", "usuario"]));
+
+  if(!jugadaClave){
+    throw new Error("La fila de JUGADA no contiene valor en la columna JUGADA");
+  }
+
+  return detalles.filter(d => {
+    const detalleJugada = normalizar(obtenerCampo(d, ["JUGADA", "Jugada", "jugada"]));
+    const detalleUsuario = normalizar(obtenerCampo(d, ["USUARIO", "Usuario", "usuario"]));
+    const detalleEstado = normalizar(obtenerCampo(d, ["ESTADO", "Estado", "estado"]));
+
+    return (
+      detalleJugada === jugadaClave &&
+      detalleEstado === "ACTIVO" &&
+      detalleUsuario === usuarioJugada
+    );
+  }).sort((a, b) => {
+    const na = parseInt(obtenerCampo(a, ["NUMERO", "Numero", "numero"])) || 0;
+    const nb = parseInt(obtenerCampo(b, ["NUMERO", "Numero", "numero"])) || 0;
+    return na - nb;
+  });
+}
+
+function renderizarReporte(jugada, detalles){
+  const fecha = obtenerCampo(jugada, ["FECHA", "Fecha", "fecha"]);
+  const hora = obtenerCampo(jugada, ["HORA", "Hora", "hora"]);
+  const usuario = obtenerCampo(jugada, ["USUARIO", "Usuario", "usuario"]);
+  const observaciones = obtenerCampo(jugada, ["OBSERVACIONES", "Observaciones", "observaciones"]);
+  const codigo = texto(obtenerCampo(jugada, ["ID", "Id", "id"])) || texto(id);
+
+  $("#fecha").textContent = fecha || "";
+  $("#hora").textContent = hora || "";
+  $("#usuario").textContent = usuario || "";
+  $("#observaciones").textContent = observaciones || "";
+  $("#fechaImpresion").textContent = "Impreso: " + new Date().toLocaleString();
+
+  try{
+    JsBarcode("#barcode", codigo, { displayValue:false });
+  }catch(e){
+    console.error("Error generando código de barras:", e);
+  }
+
+  const grid = $("#detalleGrid");
+  grid.innerHTML = "";
+
+  let totalVenta = 0;
+  const fragment = document.createDocumentFragment();
+
+  detalles.forEach(d => {
+    const numeroValor = obtenerCampo(d, ["NUMERO", "Numero", "numero"]);
+    const valor = numero(obtenerCampo(d, ["VALOR", "Valor", "valor"]));
+    totalVenta += valor;
+
+    const card = document.createElement("div");
+    card.className = "detalle-card";
+    card.innerHTML = `
+      <div><b>#${texto(numeroValor)}</b></div>
+      <div>L ${Math.round(valor)}</div>
+    `;
+    fragment.appendChild(card);
+  });
+
+  if(detalles.length === 0){
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;color:#666;padding:20px 10px;">
+        No se encontraron detalles para esta jugada.
+      </div>
+    `;
+  }else{
+    grid.appendChild(fragment);
+  }
+
+  $("#totalNumeros").textContent = String(detalles.length);
+  $("#totalVenta").textContent = "L " + Math.round(totalVenta);
+}
+
+function pad2(n){
+  return String(n).padStart(2, "0");
+}
+
+function generarSelloFechaHora(){
+  const ahora = new Date();
+  const yyyy = ahora.getFullYear();
+  const mm = pad2(ahora.getMonth() + 1);
+  const dd = pad2(ahora.getDate());
+  const hh = pad2(ahora.getHours());
+  const mi = pad2(ahora.getMinutes());
+  const ss = pad2(ahora.getSeconds());
+  return `${yyyy}-${mm}-${dd}_${hh}-${mi}-${ss}`;
+}
+
+function construirNombreArchivo(jugada){
+  const codigo = texto(obtenerCampo(jugada, ["ID", "Id", "id"])) || texto(id) || "jugada";
+  return `reporte_jugada_${codigo}_${generarSelloFechaHora()}.xlsx`;
+}
+
+function construirDatosExcel(jugada, detalles){
+  const fecha = obtenerCampo(jugada, ["FECHA", "Fecha", "fecha"]);
+  const hora = obtenerCampo(jugada, ["HORA", "Hora", "hora"]);
+  const usuario = obtenerCampo(jugada, ["USUARIO", "Usuario", "usuario"]);
+  const observaciones = obtenerCampo(jugada, ["OBSERVACIONES", "Observaciones", "observaciones"]);
+  const codigo = texto(obtenerCampo(jugada, ["ID", "Id", "id"])) || texto(id);
+
+  let totalVenta = 0;
+  detalles.forEach(d => {
+    totalVenta += numero(obtenerCampo(d, ["VALOR", "Valor", "valor"]));
+  });
+
+  const hojaResumen = [
+    ["Resumen de Jugada", ""],
+    ["ID", codigo],
+    ["Fecha", fecha],
+    ["Hora", hora],
+    ["Usuario", usuario],
+    ["Observaciones", observaciones],
+    ["Total Números", detalles.length],
+    ["Total Venta", Math.round(totalVenta)]
+  ];
+
+  const hojaDetalle = [
+    ["Número", "Valor"]
+  ];
+
+  detalles.forEach(d => {
+    hojaDetalle.push([
+      texto(obtenerCampo(d, ["NUMERO", "Numero", "numero"])),
+      Math.round(numero(obtenerCampo(d, ["VALOR", "Valor", "valor"])))
+    ]);
+  });
+
+  return { hojaResumen, hojaDetalle };
+}
+
+function crearWorkbookExcel(jugada, detalles){
+  const { hojaResumen, hojaDetalle } = construirDatosExcel(jugada, detalles);
+
+  const wb = XLSX.utils.book_new();
+
+  const wsResumen = XLSX.utils.aoa_to_sheet(hojaResumen);
+  const wsDetalle = XLSX.utils.aoa_to_sheet(hojaDetalle);
+
+  wsResumen["!cols"] = [
+    { wch: 20 },
+    { wch: 30 }
+  ];
+
+  wsDetalle["!cols"] = [
+    { wch: 18 },
+    { wch: 14 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, wsResumen, "Resumen");
+  XLSX.utils.book_append_sheet(wb, wsDetalle, "Detalle");
+
+  return wb;
+}
+
+function workbookToBlob(wb){
+  const arrayBuffer = XLSX.write(wb, {
+    bookType: "xlsx",
+    type: "array"
+  });
+
+  return new Blob(
+    [arrayBuffer],
+    {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    }
+  );
+}
+
+function descargarBlob(blob, nombreArchivo){
+  const url = URL.createObjectURL(blob);
+  const enlace = document.createElement("a");
+  enlace.href = url;
+  enlace.download = nombreArchivo;
+  document.body.appendChild(enlace);
+  enlace.click();
+  enlace.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+async function descargarExcel(jugada, detalles){
+  const wb = crearWorkbookExcel(jugada, detalles);
+  const blob = workbookToBlob(wb);
+  const nombreArchivo = construirNombreArchivo(jugada);
+  ultimoNombreArchivo = nombreArchivo;
+  descargarBlob(blob, nombreArchivo);
+  return { blob, nombreArchivo };
+}
+
+async function compartirExcel(jugada, detalles){
+  const wb = crearWorkbookExcel(jugada, detalles);
+  const blob = workbookToBlob(wb);
+  const nombreArchivo = construirNombreArchivo(jugada);
+  ultimoNombreArchivo = nombreArchivo;
+
+  const archivo = new File(
+    [blob],
+    nombreArchivo,
+    { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+  );
+
+  if(navigator.canShare && navigator.share){
+    try{
+      if(navigator.canShare({ files:[archivo] })){
+        await navigator.share({
+          title: "Resumen de Jugada",
+          text: "Archivo Excel del resumen de jugada",
+          files: [archivo]
+        });
+        return true;
+      }
+    }catch(e){
+      if(e && e.name === "AbortError"){
+        return false;
+      }
+      console.warn("No se pudo compartir con archivos, se intentará descarga:", e);
+    }
+  }
+
+  descargarBlob(blob, nombreArchivo);
+  return false;
+}
+
+async function cargarDatosBase(){
+  actualizarProgreso(10, "Validando parámetros...");
+
+  if(!texto(id)){
+    throw new Error("No se proporcionó el ID de la jugada en la URL");
+  }
+
+  actualizarProgreso(15, "Consultando hojas de cálculo...");
+
+  const promesaJugadas = cargarJSON(URL_JUGADA, "JUGADA", 45, "Hoja JUGADA cargada");
+  const promesaDetalles = cargarJSON(URL_DETALLE, "DETALLE", 75, "Hoja DETALLE cargada");
+
+  const [jugadas, detalles] = await Promise.all([
+    promesaJugadas,
+    promesaDetalles
+  ]);
+
+  actualizarProgreso(85, "Procesando información de la jugada...");
+
+  const jugada = buscarJugadaPorId(jugadas, id);
+
+  if(!jugada){
+    throw new Error("No se encontró la jugada con ID " + id);
+  }
+
+  const detallesRelacionados = obtenerDetallesRelacionados(detalles, jugada);
+
+  cacheJugada = jugada;
+  cacheDetallesRelacionados = detallesRelacionados;
+
+  return { jugada, detallesRelacionados };
+}
+
+async function iniciarPDF(){
+  try{
+    fijarEstadoBotones(true);
+    mostrarLoading();
+
+    const { jugada, detallesRelacionados } = await cargarDatosBase();
+
+    actualizarProgreso(95, "Renderizando reporte...");
+
+    renderizarReporte(jugada, detallesRelacionados);
+
+    actualizarProgreso(100, "Reporte generado correctamente");
+
+    setTimeout(() => {
+      mostrarContenido();
+      fijarEstadoBotones(false);
+      setTimeout(() => {
+        try{
+          window.print();
+        }catch(e){
+          console.error("Error al imprimir:", e);
+        }
+      }, 500);
+    }, 250);
+
+  }catch(error){
+    console.error("Error generando reporte:", error);
+    fijarEstadoBotones(false);
+    mostrarError(error.message || "Ocurrió un error al generar el reporte");
+  }
+}
+
+async function iniciarExcel(){
+  try{
+    fijarEstadoBotones(true);
+    mostrarLoading();
+
+    const { jugada, detallesRelacionados } = await cargarDatosBase();
+
+    actualizarProgreso(93, "Generando archivo Excel...");
+    await descargarExcel(jugada, detallesRelacionados);
+
+    actualizarProgreso(100, "Archivo Excel generado correctamente");
+
+    setTimeout(() => {
+      renderizarReporte(jugada, detallesRelacionados);
+      mostrarContenido();
+      fijarEstadoBotones(false);
+    }, 250);
+
+  }catch(error){
+    console.error("Error generando archivo Excel:", error);
+    fijarEstadoBotones(false);
+    mostrarError(error.message || "Ocurrió un error al generar el archivo Excel");
+  }
+}
+
+async function accionDescargarExcelActual(){
+  try{
+    if(!cacheJugada) return;
+    fijarEstadoBotones(true);
+    await descargarExcel(cacheJugada, cacheDetallesRelacionados);
+  }catch(e){
+    console.error("Error descargando Excel:", e);
+    alert("No se pudo descargar el archivo Excel.");
+  }finally{
+    fijarEstadoBotones(false);
+  }
+}
+
+async function accionCompartirExcelActual(){
+  try{
+    if(!cacheJugada) return;
+    fijarEstadoBotones(true);
+    const compartido = await compartirExcel(cacheJugada, cacheDetallesRelacionados);
+
+    if(!compartido){
+      console.log("Se realizó descarga local del archivo:", ultimoNombreArchivo);
+    }
+  }catch(e){
+    console.error("Error compartiendo Excel:", e);
+    alert("No se pudo compartir el archivo. Se intentará descargar.");
+    try{
+      await accionDescargarExcelActual();
+    }catch(_) {}
+  }finally{
+    fijarEstadoBotones(false);
+  }
+}
+
+$("#btnPDF").addEventListener("click", iniciarPDF);
+$("#btnEXCEL").addEventListener("click", iniciarExcel);
+$("#btnImprimir").addEventListener("click", () => window.print());
+$("#btnDescargarExcel").addEventListener("click", accionDescargarExcelActual);
+$("#btnCompartirExcel").addEventListener("click", accionCompartirExcelActual);
+</script>
+</body>
+</html>
